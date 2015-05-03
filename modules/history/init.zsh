@@ -10,9 +10,15 @@
 # Variables
 #
 
-HISTFILE="${ZDOTDIR:-$HOME}/.zhistory"       # The path to the history file.
-HISTSIZE=10000                   # The maximum number of events to save in the internal history.
-SAVEHIST=10000                   # The maximum number of events to save in the history file.
+# The path to the history file.
+if (( ${+XDG_DATA_HOME} )); then
+    HISTFILE="${XDG_DATA_HOME}/zsh/history"
+else
+    HISTFILE="${ZDOTDIR:-$HOME}/.zhistory"
+fi
+
+HISTSIZE=100000                  # The number of events to save in the internal history.
+SAVEHIST=100000                  # The maximum number of events to save in the history file.
 
 #
 # Options
