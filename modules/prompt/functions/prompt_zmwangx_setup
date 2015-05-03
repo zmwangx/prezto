@@ -1,0 +1,46 @@
+# -*- mode: sh; -*-
+#
+# A prompt theme optimized for iTerm2 and Solarized dark. Use with Monaco 10pt
+# (without anti-aliasing) for best experience.
+#
+# Authors:
+#   Zhiming Wang
+#
+# Screenshots:
+#   https://i.imgur.com/nCBK8ZB.png
+#
+
+pmodload 'helper'
+
+function prompt_zmwangx_precmd {
+    setopt LOCAL_OPTIONS
+    unsetopt XTRACE KSH_ARRAYS
+    (( $+functions[git-info] )) && git-info
+}
+
+function prompt_zmwangx_setup {
+    setopt LOCAL_OPTIONS
+    unsetopt XTRACE KSH_ARRAYS
+    prompt_opts=(cr percent subst)
+
+    autoload -Uz add-zsh-hook
+    add-zsh-hook precmd prompt_zmwangx_precmd
+
+    git-info parameters
+    zstyle ':prezto:module:git:info' verbose 'yes'
+    zstyle ':prezto:module:git:info:branch' format '%F{green}[%b]%f'
+    zstyle ':prezto:module:git:info:position' format '%F{green}[%p]%f'
+    zstyle ':prezto:module:git:info:commit' format '%F{green}[%.7c]%f'
+    zstyle ':prezto:module:git:info:dirty' format '%F{red}*$f'
+    zstyle ':prezto:module:git:info:action' format ' %B%F{yellow}%s%f%b'
+    zstyle ':prezto:module:git:info:keys' format \
+           'prompt' '$(coalesce "%b" "%p" "%c")%D%s ' \
+           'rprompt' ''
+
+    PROMPT='%F{yellow}%*%f %F{cyan}[%~]%f ${git_info:+${(e)git_info[prompt]}}%(?.%F{green}.%F{red})>>>%f
+'
+    RPROMPT=''
+    SPROMPT='zsh: correct %F{red}%R%f to %F{green}%r%f [nyae]? '
+}
+
+prompt_zmwangx_setup
