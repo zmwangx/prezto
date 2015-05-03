@@ -15,7 +15,11 @@ fi
 fpath=("${0:h}/external/src" $fpath)
 
 # Load and initialize the completion system ignoring insecure directories.
-autoload -Uz compinit && compinit -i
+if (( ${+ZCOMPDUMP} )); then
+    autoload -Uz compinit && compinit -i -d "${ZCOMPDUMP}"
+else
+    autoload -Uz compinit && compinit -i
+fi
 
 #
 # Options
