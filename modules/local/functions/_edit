@@ -1,0 +1,23 @@
+#compdef edit
+#autoload
+
+function _edit
+{
+    function _editable_commands
+    {
+        _alternative \
+            'aliases:alias:compadd -Qk aliases' \
+            'commands:external command:_path_commands'
+    }
+
+    _arguments -s \
+               "-n[do not recursively expand aliases; prompt instead]" \
+               "-p[perform path search (ignore builtins, aliases, etc.)]" \
+               "1:editable command:_editable_commands"
+}
+
+_edit "$@"
+
+# Local Variables:
+# mode: sh
+# End:

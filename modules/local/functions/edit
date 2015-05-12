@@ -1,0 +1,133 @@
+#
+# Find the script associated to a command and launch editor to edit it.
+#
+# Authors:
+#   Zhiming Wang <zmwangx@gmail.com>
+#
+
+function edit
+{
+    function print_error
+    {
+        echo "${RED}error: $1${RESET}" >&2
+    }
+
+    function launch_editor
+    {
+        ${EDITOR:-emacs} $1
+    }
+
+    function is_text
+    {
+        file -b $1 | grep -q text
+    }
+
+    local path_search=false
+    local recursive=true
+    while getopts ":hnp" opt; do
+        case $opt in
+            h)
+                echo "Find the script associated to a command and launch editor to edit it.
+
+Aliases, by default, are expanded recursively to find the underlying
+executable. If the executable is binary, this function denies to open the
+executable and instead prints an error.
+
+Usage:
+    edit [options] command
+
+Options:
+    -h  Print help and return 1.
+    -n  Do not recursively expand aliases; prompt instead.
+    -p  Force a path search, i.e., ignore builtins, aliases, etc.
+"
+                return 1
+                ;;
+            n) recursive=false;;
+            p) path_search=true;;
+            ?) print_error "unrecognized option -$OPTARG"; return 1;;
+            *) print_error "getopts internal error: unrecgonized option name $opt"; return 1;;
+        esac
+    done
+    shift $((OPTIND-1))
+
+    [[ -z $1 ]] && { print_error "no command provided"; return 1; }
+    local name=$1
+    local type interpretation
+    if [[ $path_search == true ]]; then
+        type="$(whence -wp $name)"
+        interpretation="$(whence -p $name)"
+    else
+        type="$(whence -w $name)"
+        interpretation="$(whence $name)"
+    fi
+    type=${type##* }
+    case $type in
+        command)
+            echo "$name is ${BLUE}$interpretation${RESET}" >&2
+            if is_text $interpretation; then
+                # try to determine if the file to edit is in a system directory
+                if [[ $interpretation == /* ]]; then
+                    topleveldir=/${${interpretation#/}%%/*}
+                    if [[ $topleveldir == /bin || $topleveldir == /sbin || $topleveldir == /usr || $topleveldir == /opt ]]; then
+                        echo "${YELLOW}warning: you are trying to edit a file in $topleveldir${RESET}"
+                        if ! read -q "?${YELLOW}really edit?${RESET} [yN] "; then
+                            echo >&2
+                            return 1
+                        fi
+                    fi
+                fi
+                launch_editor $interpretation
+            else
+                print_error "'$interpretation' appears to be binary"
+                return 1
+            fi
+            ;;
+        alias)
+            # extract the first word from the alias and store in command
+            # since the first word may contain '\ ' escapes of spaces, we use a
+            # little trick: first replace '\ ' with '\n', assuming no one is
+            # paranoid enough to put spaces in paths, then do word splitting
+            # and extract the first word, and at last replace '\n's with spaces
+            local words command
+            words=( "${=interpretation/\\ /\n}" )
+            command="${words[1]/\\n/ }"
+            echo "$name is aliased to ${BLUE}$interpretation${RESET}" >&2
+            local yn
+            if [[ $recursive != true && $command != $name ]]; then
+                read -q "yn?try to edit ${BLUE}$command${RESET}? [yN] "
+                echo >&2
+            fi
+            if [[ $recursive == true || $command == $name || $yn == y ]]; then
+                local recursive_flag
+                [[ $recursive == false ]] && recursive_flag="-n"
+                if [[ $command != $name ]]; then
+                    edit $recursive_flag $command
+                else
+                    # entering a loop, force a path search
+                    edit -p $recursive_flag $command
+                fi
+            else
+                return 1
+            fi
+            ;;
+        builtin)
+            print_error "'$name' is a shell builtin"; return 1;;
+        function)
+            print_error "'$name' is a shell function"; return 1;;
+        hashed)
+            print_error "'$name' is a command defined with the hash builtin"; return 1;;
+        reserved)
+            print_error "'$name' is a shell reserved word"; return 1;;
+        none)
+            print_error "'$name' is not recognized"; return 1;;
+        *)
+            print_error "'whence -w $name' returned unrecognized output"; return 1;;
+    esac
+}
+
+edit "$@"
+
+# Local Variables:
+# mode: sh
+# End:

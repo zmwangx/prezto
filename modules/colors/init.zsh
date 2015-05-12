@@ -1,7 +1,7 @@
 #
 # Environment variables for easier coloring and bolding.
 #
-# Author:
+# Authors:
 #   Zhiming Wang <zmwangx@gmail.com>
 #
 
