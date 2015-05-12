@@ -65,7 +65,9 @@ if is-callable 'dircolors'; then
   alias ls='ls --group-directories-first'
 
   if zstyle -t ':prezto:module:utility:ls' color; then
-    if [[ -s "$HOME/.dir_colors" ]]; then
+    if [[ -s "${XDG_CONFIG_HOME:-$HOME/.config}/dircolors/dir_colors" ]]; then
+      eval "$(dircolors --sh "${XDG_CONFIG_HOME:-$HOME/.config}/dircolors/dir_colors")"
+    elif [[ -s "$HOME/.dir_colors" ]]; then
       eval "$(dircolors --sh "$HOME/.dir_colors")"
     else
       eval "$(dircolors --sh)"
