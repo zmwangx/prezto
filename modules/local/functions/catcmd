@@ -1,0 +1,17 @@
+#
+# Print the script file associated to a command to stdout.
+#
+# This is a wrapper around the edit function within the same module.
+#
+# Authors:
+#   Zhiming Wang <zmwangx@gmail.com>
+#
+
+function catcmd
+{
+    edit -r cat $1
+}
+
+# Local Variables:
+# mode: sh
+# End:

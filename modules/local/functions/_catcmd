@@ -1,0 +1,20 @@
+#compdef catcmd
+#autoload
+
+function _catcmd
+{
+    function _catable_commands
+    {
+        _alternative \
+            'aliases:alias:compadd -Qk aliases' \
+            'commands:external command:_path_commands'
+    }
+
+    _arguments -AsS ":catable command:_editable_commands"
+}
+
+_edit "$@"
+
+# Local Variables:
+# mode: sh
+# End:

@@ -10,10 +10,13 @@ function _edit
             'commands:external command:_path_commands'
     }
 
-    _arguments -s \
-               "-n[do not recursively expand aliases; prompt instead]" \
-               "-p[perform path search (ignore builtins, aliases, etc.)]" \
-               "1:editable command:_editable_commands"
+    _arguments -AsS \
+               "-b[Allow binary, i.e., skip binary test on the executable path.]" \
+               "-h[Print help and return 1.]" \
+               "-n[Do not recursively expand aliases; prompt instead.]" \
+               "-p[Force a path search, i.e., ignore builtins, aliases, etc.]" \
+               "-r[Rather than launch the editor, run COMMAND on the script file]:external command:_path_commands" \
+               ":editable command:_editable_commands"
 }
 
 _edit "$@"
