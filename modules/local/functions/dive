@@ -10,7 +10,7 @@
 # assumes the current directory)
 function dive
 {
-    cd $1
+    [[ -n $1 ]] && cd $1
     while true; do
         children=$(ls)
         [[ $(wc -l <<<$children) == 1 && -d $children ]] || break;
