@@ -1,0 +1,23 @@
+#
+# Dive into the first nontrivial subdirectory (i.e., not the parent directory
+# of exactly one subdirectory and no files -- dotfiles excluded).
+#
+# Authors:
+#   Zhiming Wang <zmwangx@gmail.com>
+#
+
+# dive takes an optional argument: the directory to start from (by default it
+# assumes the current directory)
+function dive
+{
+    cd $1
+    while true; do
+        children=$(ls)
+        [[ $(wc -l <<<$children) == 1 && -d $children ]] || break;
+        cd $children
+    done
+}
+
+# Local Variables:
+# mode: sh
+# End:

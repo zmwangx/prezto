@@ -1,0 +1,11 @@
+#compdef dive
+#autoload
+
+function _dive
+{
+    _arguments ":directory:_directories"
+}
+
+# Local Variables:
+# mode: sh
+# End:
