@@ -7,11 +7,6 @@
 
 function edit
 {
-    function print_error
-    {
-        echo "${RED}error: $1${RESET}" >&2
-    }
-
     function launch_editor
     {
         ${EDITOR:-emacs} $1
@@ -82,7 +77,7 @@ Options:
                 if [[ -z $run && $interpretation == /* ]]; then
                     topleveldir=/${${interpretation#/}%%/*}
                     if [[ $topleveldir == /bin || $topleveldir == /sbin || $topleveldir == /usr || $topleveldir == /opt ]]; then
-                        echo "${YELLOW}warning: you are trying to edit a file in $topleveldir${RESET}"
+                        print_warning "you are trying to edit a file in $topleveldir"
                         if ! read -q "?${YELLOW}really edit?${RESET} [yN] "; then
                             echo >&2
                             return 1

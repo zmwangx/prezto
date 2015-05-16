@@ -1,0 +1,48 @@
+#
+# Colorize a script and print to stdout using Pygments.
+#
+# Authors:
+#   Zhiming Wang <zmwangx@gmail.com>
+#
+
+function colorize_script
+{
+    setopt LOCAL_OPTIONS
+    unsetopt KSH_ARRAYS
+
+    function is_text
+    {
+        file -b $1 | grep -q text
+    }
+
+    [[ -n $1 ]] || { print_error "no file specified"; return 1; }
+    local file=$1
+    is_text $file || { print_error "'$file' appears to be binary"; return 1; }
+
+    local fallback_to_plain=false
+    if whence -p pygmentize >/dev/null; then
+        # try to determine lexer from shebang
+        local headline="$(head -n1 $file)"
+        local lexer=""
+        local lexer_opts
+        lexer_opts=()
+        if [[ $headline =~ "^#!" ]]; then
+            lexer=${headline##*[ /]}
+        fi
+        if [[ -n $lexer ]]; then
+            lexer_opts=(-l $lexer)
+        fi
+        pygmentize $lexer_opts -f terminal $file 2>/dev/null || fallback_to_plain=true
+    else
+        print_warning "pygmentize not found"
+        fallback_to_plain=true
+    fi
+
+    if [[ $fallback_to_plain == true ]]; then
+        cat $file
+    fi
+}
+
+# Local Variables:
+# mode: sh
+# End:

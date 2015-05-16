@@ -13,7 +13,7 @@ function _catcmd
     _arguments ":catable command:_editable_commands"
 }
 
-_edit "$@"
+_catcmd "$@"
 
 # Local Variables:
 # mode: sh

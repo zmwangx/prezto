@@ -9,7 +9,7 @@
 
 function catcmd
 {
-    edit -r cat $1
+    edit -r colorize_script $1
 }
 
 # Local Variables:

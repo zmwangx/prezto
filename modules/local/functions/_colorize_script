@@ -1,0 +1,13 @@
+#compdef colorize_script
+#autoload
+
+function _colorize_script
+{
+    _arguments ":file:_path_files"
+}
+
+_colorize_script "$@"
+
+# Local Variables:
+# mode: sh
+# End:

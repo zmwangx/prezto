@@ -6,6 +6,8 @@ function _dive
     _arguments ":directory:_directories"
 }
 
+_dive "$@"
+
 # Local Variables:
 # mode: sh
 # End:
