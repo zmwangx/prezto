@@ -11,27 +11,31 @@
 pmodload 'helper' 'spectrum'
 
 # Correct commands.
-# setopt CORRECT
+if zstyle -t ':prezto:module:utility' correct; then
+  setopt CORRECT
+fi
 
 #
 # Aliases
 #
 
 # Disable correction.
-# alias ack='nocorrect ack'
-# alias cd='nocorrect cd'
-# alias cp='nocorrect cp'
-# alias ebuild='nocorrect ebuild'
-# alias gcc='nocorrect gcc'
-# alias gist='nocorrect gist'
-# alias grep='nocorrect grep'
-# alias heroku='nocorrect heroku'
-# alias ln='nocorrect ln'
-# alias man='nocorrect man'
-# alias mkdir='nocorrect mkdir'
-# alias mv='nocorrect mv'
-# alias mysql='nocorrect mysql'
-# alias rm='nocorrect rm'
+if zstyle -t ':prezto:module:utility' correct; then
+  alias ack='nocorrect ack'
+  alias cd='nocorrect cd'
+  alias cp='nocorrect cp'
+  alias ebuild='nocorrect ebuild'
+  alias gcc='nocorrect gcc'
+  alias gist='nocorrect gist'
+  alias grep='nocorrect grep'
+  alias heroku='nocorrect heroku'
+  alias ln='nocorrect ln'
+  alias man='nocorrect man'
+  alias mkdir='nocorrect mkdir'
+  alias mv='nocorrect mv'
+  alias mysql='nocorrect mysql'
+  alias rm='nocorrect rm'
+fi
 
 # Disable globbing.
 alias bower='noglob bower'

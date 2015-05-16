@@ -6,6 +6,16 @@ the [zsh-completions][1] project.
 
 This module must be loaded **after** the *utility* module.
 
+Settings
+--------
+
+### Fuzzy matching
+
+To enable fuzzy matching of mistyped completions, add the following line to
+*zpreztorc*:
+
+    zstyle ':prezto:module:completion' fuzzy 'yes'
+
 Contributors
 ------------
 

@@ -28,6 +28,12 @@ To disable `make` highlighting, add the following line to *zpreztorc*:
 
     zstyle ':prezto:module:utility:make' color 'no'
 
+### Correction
+
+To enable spelling correction, add the following line to *zpreztorc*:
+
+    zstyle ':prezto:module:utility' correct 'yes'
+
 Aliases
 -------
 
