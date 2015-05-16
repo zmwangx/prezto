@@ -1,0 +1,15 @@
+#
+# Print a fatal error to stderr in bold red.
+#
+# Authors:
+#   Zhiming Wang <zmwangx@gmail.com>
+#
+
+function print_fatal_error
+{
+    echo "${BOLD}${RED}fatal error: $1${RESET}" >&2
+}
+
+# Local Variables:
+# mode: sh
+# End:

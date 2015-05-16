@@ -1,0 +1,24 @@
+#
+# Print progress to stderr in green.
+#
+# By default, $1 is the message. However, if $1 is "-r", then it is interpreted
+# as a flag to turn on carriage return mode, in which case the message will be
+# preceded by a carriage return, and no newline will be printed after the
+# message.
+#
+# Authors:
+#   Zhiming Wang <zmwangx@gmail.com>
+#
+
+function print_progress
+{
+    if [[ $1 != "-r" ]]; then
+        echo "${GREEN}$1${RESET}" >&2
+    else
+        echo -n "$\r{GREEN}$2${RESET}" >&2
+    fi
+}
+
+# Local Variables:
+# mode: sh
+# End:

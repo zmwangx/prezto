@@ -1,0 +1,15 @@
+#
+# Print a command to be run to stderr in bold blue.
+#
+# Authors:
+#   Zhiming Wang <zmwangx@gmail.com>
+#
+
+function print_command
+{
+    echo "${BOLD}${BLUE}$1${RESET}" >&2
+}
+
+# Local Variables:
+# mode: sh
+# End:

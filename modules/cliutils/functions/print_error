@@ -1,0 +1,15 @@
+#
+# Print an error to stderr in red.
+#
+# Authors:
+#   Zhiming Wang <zmwangx@gmail.com>
+#
+
+function print_error
+{
+    echo "${RED}error: $1${RESET}" >&2
+}
+
+# Local Variables:
+# mode: sh
+# End:
