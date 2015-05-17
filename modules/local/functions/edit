@@ -26,7 +26,8 @@ function edit
     while getopts ":bhnpr:" opt; do
         case $opt in
             h)
-                echo "Find the script associated to a command and launch editor to edit it.
+                cat <<EOF
+Find the script associated to a command and launch editor to edit it.
 
 Aliases, by default, are expanded recursively to find the underlying
 executable. If the executable is binary, this function denies to open the
@@ -43,7 +44,7 @@ Options:
     -r COMMAND
         Rather than launch the editor, run COMMAND on the script file; e.g.,
         using 'cat' as argument prints the content of the script file.
-"
+EOF
                 return 1
                 ;;
             b) binary_test=false; flags=($flags -b);;
@@ -57,7 +58,7 @@ Options:
     done
     shift $((OPTIND-1))
 
-    [[ -z $1 ]] && { print_error "no command provided"; return 1; }
+    [[ -z $1 ]] && { print_error "no command provided; run edit -h for help"; return 1; }
     local name=$1
     local type interpretation
     if [[ $path_search == true ]]; then
