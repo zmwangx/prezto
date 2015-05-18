@@ -1,0 +1,22 @@
+#
+# Make directory and parents, and cd into the newly created directory.
+#
+# Authors:
+#   Zhiming Wang <zmwangx@gmail.com>
+#
+
+function mkcd
+{
+    if [[ $# != 1 ]]; then
+        echo "${RED}error: wrong number of arguments${RESET}" >&2
+        echo >&2
+        echo "usage: mkcd <new_directory>" >&2
+        return 1
+    fi
+    mkdir -p "$1"
+    cd "$1"
+}
+
+# Local Variables:
+# mode: sh
+# End:
