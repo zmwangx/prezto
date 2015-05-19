@@ -1,0 +1,29 @@
+#
+# Clone a DVD into a .iso image.
+#
+# Authors:
+#   Zhiming Wang <zmwangx@gmail.com>
+#
+
+function clonedvd
+{
+    if [[ $# == 0 || $1 =~ ^(-h|--help)$ ]]; then
+        cat <<EOF
+Clone a DVD into a .iso image.
+
+Usage: clonedvd <dvd_name> [<source>]
+
+The cloned image will be <dvd_name>.iso. Note that one might need to unmount
+the source volume before cloning with this command. Also, one might also want
+to decrypt a CSS-protected DVD with libdvdcss first.
+EOF
+        return 1
+    fi
+    dvd_name=$1
+    source=${2:-$PWD}
+    echo hdiutil makehybrid -udf -o "$dvd_name.iso" "$source"
+}
+
+# Local Variables:
+# mode: sh
+# End:

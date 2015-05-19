@@ -1,0 +1,28 @@
+#
+# Clone an audio CD into a .iso image.
+#
+# Authors:
+#   Zhiming Wang <zmwangx@gmail.com>
+#
+
+function clonecd
+{
+    if [[ $# == 0 || $1 =~ ^(-h|--help)$ ]]; then
+        cat <<EOF
+Clone an audio CD into a .iso image.
+
+Usage: clonecd <audio_cd_name> [<source>]
+
+The cloned image will be <audio_cd_name>.iso. Note that one might need to
+unmount the source volume before cloning with this command.
+EOF
+        return 1
+    fi
+    audio_cd_name=$1
+    source=${2:-$PWD}
+    echo hdiutil makehybrid -iso -joliet -o "$audio_cd_name.iso" "$source"
+}
+
+# Local Variables:
+# mode: sh
+# End:
