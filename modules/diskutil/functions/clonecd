@@ -20,7 +20,8 @@ EOF
     fi
     audio_cd_name=$1
     source=${2:-$PWD}
-    echo hdiutil makehybrid -iso -joliet -o "$audio_cd_name.iso" "$source"
+    echo "${BOLD}${BLUE}hdiutil makehybrid -iso -joliet -o '$audio_cd_name.iso' '$source'${RESET}" >&2
+    hdiutil makehybrid -iso -joliet -o "$audio_cd_name.iso" "$source"
 }
 
 # Local Variables:

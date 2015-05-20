@@ -21,7 +21,8 @@ EOF
     fi
     dvd_name=$1
     source=${2:-$PWD}
-    echo hdiutil makehybrid -udf -o "$dvd_name.iso" "$source"
+    echo "${BOLD}${BLUE}echo hdiutil makehybrid -udf -o '$dvd_name.iso' '$source'${RESET}" >&2
+    hdiutil makehybrid -udf -o "$dvd_name.iso" "$source"
 }
 
 # Local Variables:
