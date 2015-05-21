@@ -10,7 +10,7 @@ function _catcmd
             'commands:external command:_path_commands'
     }
 
-    _arguments ":catable command:_editable_commands"
+    _arguments ":catable command:_catable_commands"
 }
 
 _catcmd "$@"
