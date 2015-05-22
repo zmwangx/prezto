@@ -1,0 +1,31 @@
+#
+# Create a new iTerm2 vertical split pane in the current directory.
+#
+# By vertical split pane I mean the number of rows are divided into two. iTerm2
+# calls that "split horizontally". Oh well.
+#
+# Authors:
+#   Zhiming Wang <zmwangx@gmail.com>
+#
+
+local command="cd \\\"$PWD\\\""
+(( $# > 0 )) && command="${command}; $*"
+
+the_app=$(
+  osascript 2>/dev/null <<EOF
+    tell application "System Events"
+      name of first item of (every process whose frontmost is true)
+    end tell
+EOF
+)
+
+[[ "$the_app" == 'iTerm2' ]] && {
+  osascript 2>/dev/null <<EOF
+    tell application "iTerm2"
+      tell current session of current window
+        split horizontally with same profile
+        write text "${command}"
+      end tell
+    end tell
+EOF
+}
