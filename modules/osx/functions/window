@@ -29,12 +29,8 @@ EOF
   osascript 2>/dev/null <<EOF
     tell application "iTerm2"
       create window with default profile
-      tell current window
-        tell current tab
-          tell current session
-            write text "${command}"
-          end tell
-        end tell
+      tell current session of current window
+        write text "${command}"
       end tell
     end tell
 EOF
