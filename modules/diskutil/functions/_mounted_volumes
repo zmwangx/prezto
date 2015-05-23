@@ -1,0 +1,25 @@
+#autoload
+#
+# Complete to mounted volumes with mountpoint as description.
+#
+# Authors:
+#   Zhiming Wang <zmwangx@gmail.com>
+#
+
+function _mounted_volumes
+{
+    local -a volume_desc
+    local line node mountpoint
+    paste <(df --output=source) <(df --output=target) | sed 1d | while read line; do
+        IFS=$'\t' read node mountpoint <<<$line
+        node=${node#/dev/}
+        volume_desc+=("${node//:/\\:}:${mountpoint//:/\\:}")
+    done
+    _describe -t volumes "volumes" volume_desc
+}
+
+_mounted_volumes "$@"
+
+# Local Variables:
+# mode: sh
+# End:

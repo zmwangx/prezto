@@ -1,0 +1,13 @@
+#compdef clonecd
+#autoload
+
+function _clonedvd
+{
+    _arguments ":DVD name: " ":disk:_disks -path"
+}
+
+_clonedvd "$@"
+
+# Local Variables:
+# mode: sh
+# End:

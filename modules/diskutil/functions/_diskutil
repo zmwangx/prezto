@@ -1,0 +1,85 @@
+#compdef diskutil
+#autoload
+#
+# Partial completion for diskutil (commonly used, nondestructive verbs).
+#
+# Requires _disks, _mounted_volumes, and _mountable_volumes.
+#
+# Authors:
+#   Zhiming Wang <zmwangx@gmail.com>
+#
+
+function _diskutil
+{
+    local -A _common_usage_options
+    _common_usage_options=(
+        -plist "-plist[display output in plist format]"
+    )
+
+    local -a _verbs
+    _verbs=(
+        'list:list disks'
+        'info:get detailed information about a specific whole disk or partition'
+        'activity:continuously display system-wide disk manipulation activity'
+        'listFilesystems:show the file system personalities available for formatting'
+        'unmount:unmount a single volume'
+        'umount:unmount a single volume'
+        'unmountDisk:unmount an entire disk (all volumes)'
+        'umountDisk:unmount an entire disk (all volumes)'
+        'eject:eject a disk'
+        'mount:mount a single volume'
+        'mountDisk:mount an entire disk (all mountable volumes)'
+    )
+
+    local -A opt_args
+
+    _arguments -C '*:: :->subcmds'
+
+    if (( CURRENT == 1 )); then
+        _describe -t commands "diskutil subcommands" _verbs
+        return
+    fi
+
+    case "$words[1]" in
+        list)
+            _arguments ": :_disks" && return 0
+            ;;
+        info)
+            _arguments "$_common_usage_options[-plist]" ": :_disks" && return 0
+            ;;
+        activity)
+            return 0
+            ;;
+        listFilesystems)
+            _arguments "$_common_usage_options[-plist]" && return 0
+            ;;
+        unmount|umount)
+            _arguments \
+                "::qualifiers:((force\:force-unmount\ the\ volume))" \
+                ": :_mounted_volumes"
+            ;;
+        unmountDisk|umountDisk)
+            _arguments \
+                "::qualifiers:((force\:force-unmount\ the\ volumes))" \
+                ": :_disks"
+            ;;
+        eject)
+            _arguments "*: :_disks" && return 0
+            ;;
+        mount)
+            _arguments \
+                "::qualifiers:((readOnly\:mount\ the\ file\ system\ in\ read-only\ mode))" \
+                "-mountPoint[use the specified path instead of the standard path of /Volumes/VolumeName]:mount point:_path_files" \
+                ": :_mountable_volumes" && return 0
+            ;;
+        mountDisk)
+            _arguments ": :_disks" && return 0
+            ;;
+    esac
+}
+
+_diskutil "$@"
+
+# Local Variables:
+# mode: sh
+# End:

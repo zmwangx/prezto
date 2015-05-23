@@ -1,0 +1,48 @@
+#compdef diskutil
+#autoload
+#
+# Complete to mountable volumes with volume name as description.
+#
+# Authors:
+#   Zhiming Wang <zmwangx@gmail.com>
+#
+
+function _mountable_volumes
+{
+    setopt LOCAL_OPTIONS
+    unsetopt KSH_ARRAYS
+    local -a mounted volume_desc
+    local disk diskid diskinfo partition_index partition_info partition_id volume_name
+    local PlistBuddy=/usr/libexec/PlistBuddy
+    mounted=( $(df --output=source | sed -e 1d -e "s_^/dev/__") )
+    for disk in /dev/disk[0-9]##; do
+        diskid=${disk#/dev/}
+        diskinfo=$(diskutil list -plist $diskid)
+        # iterate through partitions
+        partition_index=0
+        while partition_info=$($PlistBuddy -x -c "print AllDisksAndPartitions:0:Partitions:$partition_index" =(echo $diskinfo) 2>/dev/null); do
+            partition_id=$($PlistBuddy -c "print DeviceIdentifier" =(echo $partition_info) 2>/dev/null)
+            if [[ -z $mounted[(r)$partition_id] ]]; then
+                volume_name=$($PlistBuddy -c "print VolumeName" =(echo $partition_info) 2>/dev/null)
+                [[ -n $partition_id ]] && volume_desc+=("$partition_id:${volume_name//:/\\:}")
+            fi
+            ((partition_index++))
+        done
+        # no partitions found
+        if ((partition_index == 0)); then
+            partition_info=$($PlistBuddy -x -c "print AllDisksAndPartitions:0" =(echo $diskinfo))
+            partition_id=$($PlistBuddy -c "print DeviceIdentifier" =(echo $partition_info) 2>/dev/null)
+            if [[ -z $mounted[(r)$partition_id] ]]; then
+                volume_name=$($PlistBuddy -c "print VolumeName" =(echo $partition_info) 2>/dev/null)
+                [[ -n $partition_id ]] && volume_desc+=("$partition_id:${volume_name//:/\\:}")
+            fi
+        fi
+    done
+    _describe -t volumes "volumes" volume_desc
+}
+
+_mountable_volumes "$@"
+
+# Local Variables:
+# mode: sh
+# End:

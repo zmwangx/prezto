@@ -1,0 +1,13 @@
+#compdef clonecd
+#autoload
+
+function _clonecd
+{
+    _arguments ":audio CD name: " ":disk:_disks -path"
+}
+
+_clonecd "$@"
+
+# Local Variables:
+# mode: sh
+# End:

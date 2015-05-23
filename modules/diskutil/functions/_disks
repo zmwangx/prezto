@@ -1,0 +1,59 @@
+#autoload
+#
+# Complete to disk identifiers with comma separated (mounted) volume names as
+# description.
+#
+# Authors:
+#   Zhiming Wang <zmwangx@gmail.com>
+#
+
+# This function optionally accepts a -path option, in which case the full paths
+# /dev/disk* are generated instead of just the disk identifiers.
+function _disks
+{
+    setopt LOCAL_OPTIONS
+    setopt NULL_GLOB
+    setopt EXTENDED_GLOB
+
+    function _gen_description
+    {
+        local diskid=$1
+        local diskinfo volume
+        local PlistBuddy=/usr/libexec/PlistBuddy
+        diskinfo=$(diskutil list -plist $diskid)
+        if volume=$($PlistBuddy -c "print AllDisksAndPartitions:0:VolumeName" =(echo $diskinfo) 2>/dev/null); then
+            # only a single volume
+            echo $volume
+            return
+        fi
+        # multiple partitions
+        local partition_index=0
+        local description=""
+        while partition_info=$($PlistBuddy -x -c "print AllDisksAndPartitions:0:Partitions:$partition_index" =(echo $diskinfo) 2>/dev/null); do
+            volume_name=$($PlistBuddy -c "print VolumeName" =(echo $partition_info) 2>/dev/null)
+            description+="${volume_name:+$volume_name, }"
+            ((partition_index++))
+        done
+        echo ${description%, }
+    }
+
+    local -a disk_desc
+    local disk diskid
+    local -a fullpath
+    zparseopts -E -D "path=fullpath"
+    for disk in /dev/disk[0-9]##; do
+        diskid=${disk#/dev/}
+        if [[ -n $fullpath ]]; then
+            disk_desc+=("/dev/$diskid:${$(_gen_description $diskid)//:/\\:}")
+        else
+            disk_desc+=("$diskid:${$(_gen_description $diskid)//:/\\:}")
+        fi
+    done
+    _describe -t disks "disks" disk_desc
+}
+
+_disks "$@"
+
+# Local Variables:
+# mode: sh
+# End:
