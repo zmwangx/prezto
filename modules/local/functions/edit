@@ -52,7 +52,7 @@ EOF
             p) path_search=true; flags=($flags -p);;
             r) run=$OPTARG; flags=($flags -r $run);;
             :) print_error "option -$OPTARG requires an argument"; return 1;;
-            ?) print_error "unrecognized option -$OPTARG"; return 1;;
+            \?) print_error "unrecognized option -$OPTARG"; return 1;;
             *) print_error "getopts internal error: unrecgonized option name $opt"; return 1;;
         esac
     done
