@@ -15,7 +15,7 @@ pmodload 'helper'
 function prompt_zmwangx_precmd {
     setopt LOCAL_OPTIONS
     unsetopt XTRACE KSH_ARRAYS
-    (( $+functions[git-info] )) && git-info
+    (( $+functions[git-info] )) && git-info 2>/dev/null
 }
 
 function prompt_zmwangx_setup {
