@@ -37,7 +37,7 @@ function prompt_zmwangx_setup {
            'prompt' '$(coalesce "%b" "%p" "%c")%D%s ' \
            'rprompt' ''
 
-    PROMPT='%F{yellow}%*%f %F{cyan}[%~]%f ${git_info:+${(e)git_info[prompt]}}%(?.%F{green}.%F{red})>>>%f
+    PROMPT='%F{yellow}%*%f %F{cyan}[%~]%f ${git_info:+${(e)git_info[prompt]}}%(?.%F{green}.%F{red})>>>%f%(1j. %F{blue}(%j)%f.)
 '
     RPROMPT=''
     SPROMPT='zsh: correct %F{red}%R%f to %F{green}%r%f [nyae]? '
