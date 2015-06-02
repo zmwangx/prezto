@@ -15,7 +15,7 @@ pmodload 'helper'
 function prompt_zmwangx_precmd {
     setopt LOCAL_OPTIONS
     unsetopt XTRACE KSH_ARRAYS
-    (( $+functions[git-info] )) && git-info 2>/dev/null
+    (( $+functions[git-info] )) && git-info
 }
 
 function prompt_zmwangx_setup {
@@ -26,7 +26,7 @@ function prompt_zmwangx_setup {
     autoload -Uz add-zsh-hook
     add-zsh-hook precmd prompt_zmwangx_precmd
 
-    git-info parameters
+    # git-info parameters
     zstyle ':prezto:module:git:info' verbose 'yes'
     zstyle ':prezto:module:git:info:branch' format '%F{green}[%b]%f'
     zstyle ':prezto:module:git:info:position' format '%F{green}[%p]%f'
@@ -37,7 +37,7 @@ function prompt_zmwangx_setup {
            'prompt' '$(coalesce "%b" "%p" "%c")%D%s ' \
            'rprompt' ''
 
-    PROMPT='%F{yellow}%*%f %F{cyan}[%~]%f ${git_info:+${(e)git_info[prompt]}}%(?.%F{green}.%F{red})>>>%f%(1j. %F{blue}(%j)%f.)
+    PROMPT='%B%F{blue}${SSH_CLIENT:+%M }%f%b%F{yellow}%*%f %F{cyan}[%~]%f ${git_info:+${(e)git_info[prompt]}}%(?.%F{green}.%F{red})>>>%f%(1j. %F{blue}(%j)%f.)
 '
     RPROMPT=''
     SPROMPT='zsh: correct %F{red}%R%f to %F{green}%r%f [nyae]? '
