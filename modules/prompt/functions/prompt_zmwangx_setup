@@ -37,8 +37,15 @@ function prompt_zmwangx_setup {
            'prompt' '$(coalesce "%b" "%p" "%c")%D%s ' \
            'rprompt' ''
 
-    PROMPT='%B%F{blue}${SSH_CLIENT:+%M }%f%b%F{yellow}%*%f %F{cyan}[%~]%f ${git_info:+${(e)git_info[prompt]}}%(?.%F{green}.%F{red})>>>%f%(1j. %F{blue}(%j)%f.)
-'
+    local rootseg='%(!.%B%F{red}ROOT%f%b .)'
+    local hostseg='%B%F{blue}${SSH_CLIENT:+%M }%f%b'
+    local timeseg='%F{yellow}%*%f '
+    local pathseg='%F{cyan}[%~]%f '
+    local gitseg='${git_info:+${(e)git_info[prompt]}}'
+    local jobseg='%(1j.%F{blue}(%j)%f .)'
+    local arrowseg='%(?.%F{green}.%F{red})>>>%f'
+    PROMPT="$rootseg$hostseg$timeseg$pathseg$gitseg$jobseg$arrowseg
+"
     RPROMPT=''
     SPROMPT='zsh: correct %F{red}%R%f to %F{green}%r%f [nyae]? '
 }
