@@ -42,9 +42,10 @@ function prompt_zmwangx_setup {
     local timeseg='%F{yellow}%*%f '
     local pathseg='%F{cyan}[%~]%f '
     local gitseg='${git_info:+${(e)git_info[prompt]}}'
+    local pythonseg='%F{magenta}${VIRTUAL_ENV:+py${VIRTUAL_ENV_PYTHON_VERSION}:${VIRTUAL_ENV##*/} }%f'
     local jobseg='%(1j.%F{blue}(%j)%f .)'
     local arrowseg='%(?.%F{green}.%F{red})>>>%f'
-    PROMPT="$rootseg$hostseg$timeseg$pathseg$gitseg$jobseg$arrowseg
+    PROMPT="$rootseg$hostseg$timeseg$pathseg$gitseg$pythonseg$jobseg$arrowseg
 "
     RPROMPT=''
     SPROMPT='zsh: correct %F{red}%R%f to %F{green}%r%f [nyae]? '
