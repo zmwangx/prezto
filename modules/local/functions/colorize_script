@@ -19,7 +19,6 @@ function colorize_script
     local file=$1
     is_text $file || { print_error "'$file' appears to be binary"; return 1; }
 
-    local fallback_to_plain=false
     if whence -p pygmentize >/dev/null; then
         # try to determine lexer from shebang
         local headline="$(head -n1 $file)"
@@ -32,13 +31,9 @@ function colorize_script
         if [[ -n $lexer ]]; then
             lexer_opts=(-l $lexer)
         fi
-        pygmentize $lexer_opts -f terminal $file 2>/dev/null || fallback_to_plain=true
+        pygmentize $lexer_opts -f terminal $file 2>/dev/null || pygmentize -g -f terminal $file
     else
         print_warning "pygmentize not found"
-        fallback_to_plain=true
-    fi
-
-    if [[ $fallback_to_plain == true ]]; then
         cat $file
     fi
 }
