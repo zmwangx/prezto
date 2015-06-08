@@ -6,6 +6,7 @@
 #
 
 source "${0:h}/options.zsh"
+source "${0:h}/widgets.zsh"
 source "${0:h}/keybindings.zsh"
 
 pmodload "cliutils"
