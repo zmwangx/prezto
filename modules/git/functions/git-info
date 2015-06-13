@@ -252,13 +252,10 @@ function git-info {
     # Get ahead and behind counts.
     ahead_and_behind="$(${(z)ahead_and_behind_cmd} 2> /dev/null)"
 
-    # Temporarily change IFS to TAB in order to parse ahead_and_behind.
-    local saved_ifs="$IFS"
-    IFS=$'\t'
-
     # Format ahead.
     if [[ -n "$ahead_format" ]]; then
-      ahead="$ahead_and_behind[(w)1]"
+      # The separator between the two colons is a literal tab character.
+      ahead="$ahead_and_behind[(ws:	:)1]"
       if (( ahead > 0 )); then
         zformat -f ahead_formatted "$ahead_format" "A:$ahead"
       fi
@@ -266,14 +263,12 @@ function git-info {
 
     # Format behind.
     if [[ -n "$behind_format" ]]; then
-      behind="$ahead_and_behind[(w)2]"
+      # The separator between the two colons is a literal tab character.
+      behind="$ahead_and_behind[(ws:	:)2]"
       if (( behind > 0 )); then
         zformat -f behind_formatted "$behind_format" "B:$behind"
       fi
     fi
-
-    # Restore IFS.
-    IFS="$saved_ifs"
   fi
 
   # Get status type.
