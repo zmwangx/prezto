@@ -23,7 +23,7 @@
 #                    with upstream. Default is 'yes'.
 #
 # * delay:           Floating point number; delay in seconds for dirty check in
-#                    big repos (git status takes >2 seconds). Default is 1800.
+#                    big repos (git status takes >2 seconds). Default is 300.
 #
 # * untracked_dirty: Boolean (yes or no); whether to check for untracked files.
 #                    Default is 'yes'. 'no' is only really useful in huge
@@ -32,10 +32,7 @@
 # #############################################################################
 #
 # Authors:
-#   Zhiming Wang
-#
-# Screenshots:
-#   https://i.imgur.com/nCBK8ZB.png
+#   Zhiming Wang <zmwangx@gmail.com>
 #
 
 # terminal codes:
@@ -207,7 +204,7 @@ prompt_zmwangx_async_tasks() {
     # if dirty checking is sufficiently fast, tell worker to check it again, or wait for timeout
     local time_since_last_dirty_check=$(( $EPOCHSECONDS - ${prompt_zmwangx_git_last_dirty_check_timestamp:-0} ))
     local dirty_check_delay_window
-    zstyle -s ':prezto:module:prompt:zmwangx:git' delay dirty_check_delay_window || dirty_check_delay_window=1800
+    zstyle -s ':prezto:module:prompt:zmwangx:git' delay dirty_check_delay_window || dirty_check_delay_window=300
     if (( $time_since_last_dirty_check > $dirty_check_delay_window )); then
         unset prompt_zmwangx_git_last_dirty_check_timestamp
         local untracked_dirty
