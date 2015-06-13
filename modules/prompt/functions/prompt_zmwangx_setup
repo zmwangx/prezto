@@ -1,7 +1,35 @@
 # -*- mode: sh; -*-
 #
-# A prompt theme optimized for iTerm2 and Solarized dark. Use with Monaco 10pt
-# (without anti-aliasing) for best experience.
+# My pure ASCII prompt theme.
+#
+# The theme is optimized for Solarized dark. I use it with Monaco 10pt (without
+# anti-aliasing).
+#
+# The code is mostly ripped off the Pure theme by Sindre Sorhus
+# (https://github.com/sindresorhus/pure, MIT license). I originally forked from
+# release 1.1.0 to take advantage of its async feature.
+#
+# #############################################################################
+#
+# Customizations
+#
+# #############################################################################
+#
+# There are three zstyles you can set to customize the behavior of this theme,
+# all under ':prezto:module:prompt:zmwangx:git':
+#
+# * autofetch:       Boolean (yes or no); whether to perform fetch from
+#                    upstream automatically when calculating relative position
+#                    with upstream. Default is 'yes'.
+#
+# * delay:           Floating point number; delay in seconds for dirty check in
+#                    big repos (git status takes >2 seconds). Default is 1800.
+#
+# * untracked_dirty: Boolean (yes or no); whether to check for untracked files.
+#                    Default is 'yes'. 'no' is only really useful in huge
+#                    repos.
+#
+# #############################################################################
 #
 # Authors:
 #   Zhiming Wang
@@ -10,45 +38,233 @@
 #   https://i.imgur.com/nCBK8ZB.png
 #
 
-pmodload 'helper'
+# terminal codes:
+# \e7   => save cursor position
+# \e[2A => move cursor 2 lines up
+# \e[1G => go to position 1 in terminal
+# \e8   => restore cursor position
+# \e[K  => clears everything after the cursor on the current line
 
-function prompt_zmwangx_precmd {
-    setopt LOCAL_OPTIONS
-    unsetopt XTRACE KSH_ARRAYS
-    (( $+functions[git-info] )) && git-info
+prompt_zmwangx_setup() {
+    setopt localoptions noshwordsplit
+
+    prompt_opts=(cr subst percent)
+
+    zmodload zsh/datetime
+    pmodload async
+    pmodload git
+    pmodload helper
+    autoload -Uz add-zsh-hook
+
+    # initialize async
+    async
+
+    # hook up
+    add-zsh-hook precmd prompt_zmwangx_precmd
+    add-zsh-hook preexec prompt_zmwangx_preexec
+
+    # let us start on a clean line!
+    PROMPT=''
 }
 
-function prompt_zmwangx_setup {
-    setopt LOCAL_OPTIONS
-    unsetopt XTRACE KSH_ARRAYS
-    prompt_opts=(cr percent subst)
+prompt_zmwangx_precmd() {
+    # save exit status of last command; %{?.true-text.false-text} does not for
+    # us because the preprompt may be updated asynchronously, and conditional
+    # prompt expansion will pick up status of internal async command
+    prompt_zmwangx_last_cmd_exit_status=$?
 
-    autoload -Uz add-zsh-hook
-    add-zsh-hook precmd prompt_zmwangx_precmd
+    setopt localoptions noshwordsplit
 
-    # git-info parameters
-    zstyle ':prezto:module:git:info' verbose 'yes'
-    zstyle ':prezto:module:git:info:branch' format '%F{green}[%b]%f'
-    zstyle ':prezto:module:git:info:position' format '%F{green}[%p]%f'
-    zstyle ':prezto:module:git:info:commit' format '%F{green}[%.7c]%f'
-    zstyle ':prezto:module:git:info:dirty' format '%F{red}*%f'
-    zstyle ':prezto:module:git:info:action' format ' %B%F{yellow}%s%f%b'
-    zstyle ':prezto:module:git:info:keys' format \
-           'prompt' '$(coalesce "%b" "%p" "%c")%D%s ' \
-           'rprompt' ''
+    # by making sure that prompt_zmwangx_cmd_timestamp is defined here the
+    # async functions are prevented from interfering with the initial preprompt
+    # rendering
+    prompt_zmwangx_cmd_timestamp=
 
+    # preform async git dirty check and fetch
+    prompt_zmwangx_async_tasks
+
+    # print the preprompt
+    prompt_zmwangx_preprompt_render 'precmd'
+
+    # remove the prompt_zmwangx_cmd_timestamp, indicating that precmd has completed
+    unset prompt_zmwangx_cmd_timestamp
+}
+
+prompt_zmwangx_preexec() {
+    setopt localoptions noshwordsplit
+
+    prompt_zmwangx_cmd_timestamp=$EPOCHSECONDS
+}
+
+# string length ignoring ansi escapes
+prompt_zmwangx_string_length() {
+    setopt localoptions noshwordsplit
+    # Subtract one since newline is counted as two characters
+    echo $(( ${#${(S%%)1//(\%([KF1]|)\{*\}|\%[Bbkf])}} - 1 ))
+}
+
+prompt_zmwangx_preprompt_render() {
+    setopt localoptions noshwordsplit noksharrays
+
+    # check that no command is currently running, the prompt will otherwise be rendered in the wrong place
+    [[ -n ${prompt_zmwangx_cmd_timestamp+x} && $1 != 'precmd' ]] && return
+
+    # set style for git branch/position/commit; dim if dirty check has been delayed
+    local branch_color
+    if [[ -z ${prompt_zmwangx_git_last_dirty_check_timestamp+x} ]]; then
+        branch_color='green'
+    else
+        branch_color='242'
+    fi
+    zstyle ':prezto:module:git:info:branch' format "%F{$branch_color}%b%f"
+    zstyle ':prezto:module:git:info:position' format "%F{$branch_color}%p%f"
+    zstyle ':prezto:module:git:info:commit' format "%F{$branch_color}%.7c%f"
+
+    # other basic git styles
+    zstyle ':prezto:module:git:info:action' format '%F{242}|%f%F{yellow}%s%f'
+    zstyle ':prezto:module:git:info:ahead' format '%F{blue}^%f'
+    zstyle ':prezto:module:git:info:behind' format '%F{blue}v%f'
+    zstyle ':prezto:module:git:info:keys' format 'prompt' ' $(coalesce "%b" "%p" "%c")%s%A%B' 'rprompt' ''
+
+    # construct prompt
+    # $prompt_zmwangx_git_dirty is set asynchronously; everything else is cheap and synchronous
+    (( $+functions[git-info] )) && git-info
     local rootseg='%(!.%B%F{red}ROOT%f%b .)'
-    local hostseg='%B%F{blue}${SSH_CLIENT:+%M }%f%b'
+    local hostseg='%B%F{blue}${SSH_CONNECTION:+%M }%f%b'
     local timeseg='%F{yellow}%*%f '
-    local pathseg='%F{cyan}[%~]%f '
-    local gitseg='${git_info:+${(e)git_info[prompt]}}'
+    local pathseg='%F{cyan}[%~]%f'
+    local gitseg="${git_info:+${(e)git_info[prompt]}}%F{red}${prompt_zmwangx_git_dirty}%f "
     local pythonseg='%F{magenta}${VIRTUAL_ENV:+py${VIRTUAL_ENV_PYTHON_VERSION}:${VIRTUAL_ENV##*/} }%f'
     local jobseg='%(1j.%F{blue}(%j)%f .)'
-    local arrowseg='%(?.%F{green}.%F{red})>>>%f'
-    PROMPT="$rootseg$hostseg$timeseg$pathseg$gitseg$pythonseg$jobseg$arrowseg
-"
-    RPROMPT=''
-    SPROMPT='zsh: correct %F{red}%R%f to %F{green}%r%f [nyae]? '
+    if (( prompt_zmwangx_last_cmd_exit_status )); then
+        local promptseg='%F{red}>>>%f'
+    else
+        local promptseg='%F{green}>>>%f'
+    fi
+
+    # construct prompt, beginning with path
+    preprompt="$rootseg$hostseg$timeseg$pathseg$gitseg$pythonseg$jobseg$promptseg"
+
+    # if executing through precmd, do not perform fancy terminal editing
+    if [[ $1 == 'precmd' ]]; then
+        print -P $preprompt
+    else
+        # only redraw if prompt has changed
+        [[ $prompt_zmwangx_last_preprompt != $preprompt ]] || return
+
+        # calculate length of preprompt for redraw purposes
+        local preprompt_length=$(prompt_zmwangx_string_length $preprompt)
+        local lines=$(( $preprompt_length / $COLUMNS + 1 ))
+
+        # disable clearing of line if last char of prompt is last column of terminal
+        local clr='\e[K'
+        (( $preprompt_length * $lines == $COLUMNS - 1 )) && clr=''
+
+        # modify previous prompt
+        print -Pn "\e7\e[${lines}A\e[1G${preprompt}${clr}\e8"
+    fi
+
+    # store previous prompt for comparison
+    prompt_zmwangx_last_preprompt=$preprompt
 }
 
-prompt_zmwangx_setup
+prompt_zmwangx_async_tasks() {
+    setopt localoptions noshwordsplit
+
+    # initialize async worker
+    ((!${prompt_zmwangx_async_init:-0})) && {
+        async_start_worker 'prompt_zmwangx' -u -n
+        async_register_callback 'prompt_zmwangx' prompt_zmwangx_async_callback
+        prompt_zmwangx_async_init=1
+    }
+
+    # get the current git working tree, empty if not inside a git directory
+    local working_tree="$(command git rev-parse --show-toplevel 2>/dev/null)"
+
+    # check if the working tree changed (prompt_zmwangx_current_working_tree is prefixed by "x")
+    if [[ "${prompt_zmwangx_current_working_tree:-x}" != "x${working_tree}" ]]; then
+        # stop any running async jobs
+        async_flush_jobs 'prompt_zmwangx'
+
+        # reset git preprompt variables, switching working tree
+        unset prompt_zmwangx_git_dirty
+        unset prompt_zmwangx_git_last_dirty_check_timestamp
+
+        # set the new working tree and prefix with "x" to prevent the creation of a named path by AUTO_NAME_DIRS
+        prompt_zmwangx_current_working_tree="x${working_tree}"
+    fi
+
+    # only perform tasks inside git working tree
+    [[ -n $working_tree ]] || return
+
+    if zstyle -T ':prezto:module:prompt:zmwangx:git' autofetch; then
+        # make sure working tree is not $HOME
+        [[ $working_tree != $HOME ]] &&
+        # tell worker to do a git fetch
+        async_job 'prompt_zmwangx' prompt_zmwangx_async_git_fetch $working_tree
+    fi
+
+    # if dirty checking is sufficiently fast, tell worker to check it again, or wait for timeout
+    local time_since_last_dirty_check=$(( $EPOCHSECONDS - ${prompt_zmwangx_git_last_dirty_check_timestamp:-0} ))
+    local dirty_check_delay_window
+    zstyle -s ':prezto:module:prompt:zmwangx:git' delay dirty_check_delay_window || dirty_check_delay_window=1800
+    if (( $time_since_last_dirty_check > $dirty_check_delay_window )); then
+        unset prompt_zmwangx_git_last_dirty_check_timestamp
+        local untracked_dirty
+        zstyle -b ':prezto:module:prompt:zmwangx:git' untracked_dirty untracked_dirty || untracked_dirty=yes
+        async_job 'prompt_zmwangx' prompt_zmwangx_async_git_dirty $untracked_dirty $working_tree
+    fi
+}
+
+prompt_zmwangx_async_callback() {
+    setopt localoptions noshwordsplit
+
+    local job=$1
+    local output=$3
+    local exec_time=$4
+
+    case "${job}" in
+        prompt_zmwangx_async_git_dirty)
+            prompt_zmwangx_git_dirty=$output
+            prompt_zmwangx_preprompt_render
+
+            # when prompt_zmwangx_git_last_dirty_check_timestamp is set, the
+            # git info is displayed in a different color, this is why the
+            # prompt is rendered before the variable is (potentially) set
+            (( $exec_time > 2 )) && prompt_zmwangx_git_last_dirty_check_timestamp=$EPOCHSECONDS
+            ;;
+        prompt_zmwangx_async_git_fetch)
+            prompt_zmwangx_preprompt_render
+            ;;
+    esac
+}
+
+# fastest possible way to check if repo is dirty
+prompt_zmwangx_async_git_dirty() {
+    setopt localoptions noshwordsplit
+
+    local untracked_dirty=$1; shift
+
+    # use cd -q to avoid side effects of changing directory, e.g. chpwd hooks
+    cd -q "$*"
+
+    if [[ $untracked_dirty == no ]]; then
+        command git diff --no-ext-diff --quiet --exit-code
+    else
+        test -z "$(command git status --porcelain --untracked-files=normal)"
+    fi
+
+    (( $? )) && echo "*"
+}
+
+prompt_zmwangx_async_git_fetch() {
+    setopt localoptions noshwordsplit
+
+    # use cd -q to avoid side effects of changing directory, e.g. chpwd hooks
+    cd -q "$*"
+
+    # set GIT_TERMINAL_PROMPT=0 to disable auth prompting for git fetch (git 2.3+)
+    GIT_TERMINAL_PROMPT=0 command git -c gc.auto=0 fetch
+}
+
+prompt_zmwangx_setup "$@"
