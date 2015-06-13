@@ -19,3 +19,6 @@
 [submodule "modules/bd/external"]
 	path = modules/bd/external
 	url = https://github.com/Tarrasch/zsh-bd.git
+[submodule "modules/async/external"]
+	path = modules/async/external
+	url = git@github.com:mafredri/zsh-async.git
