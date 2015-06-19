@@ -31,7 +31,7 @@ function _disks
         local description=""
         while partition_info=$($PlistBuddy -x -c "print AllDisksAndPartitions:0:Partitions:$partition_index" =(echo $diskinfo) 2>/dev/null); do
             volume_name=$($PlistBuddy -c "print VolumeName" =(echo $partition_info) 2>/dev/null)
-            description+="${volume_name:+$volume_name, }"
+            [[ $volume_name != EFI ]] && description+="${volume_name:+$volume_name, }"
             ((partition_index++))
         done
         echo ${description%, }
