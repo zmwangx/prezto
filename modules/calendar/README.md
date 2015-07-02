@@ -74,10 +74,12 @@ Functions and aliases
 
   ```
 
-  One may specify options recognized by `cal`. On recent FreeBSD
-  implementations, one may pass a two-digit number as the last argument, and
-  `jan`, `january`, etc. will recognize that as a year number from the 21st
-  century, and print the month calendar from the year specified, e.g.:
+  One may specify options recognized by `cal`.
+
+  On recent FreeBSD implementations, one may pass a two-digit number as the
+  last argument, and `jan`, `january`, etc. will recognize that as a year
+  number from the 21st century, and print the month calendar from the year
+  specified, e.g.:
 
   ```
   > jan 16        # output generated on Ubuntu 12.04

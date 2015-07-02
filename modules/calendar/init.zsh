@@ -4,9 +4,9 @@
 # Supported cal implementations:
 #
 #   * FreeBSD implementation (also seen in more recent Debians)
-#     <https://www.freebsd.org/cgi/man.cgi?query=cal>
+#     https://www.freebsd.org/cgi/man.cgi?query=cal
 #   * OS X implementation (older implementaion from FreeBSD 6.0)
-#     <https://developer.apple.com/library/mac/documentation/Darwin/Reference/ManPages/man1/cal.1.html>
+#     https://developer.apple.com/library/mac/documentation/Darwin/Reference/ManPages/man1/cal.1.html
 #
 # Authors:
 #   Zhiming Wang <zmwangx@gmail.com>
@@ -15,15 +15,15 @@
 (( ! $+commands[cal] )) && return 1
 
 # util-linux implementation not supported
-# <http://man7.org/linux/man-pages/man1/cal.1.html>
+# http://man7.org/linux/man-pages/man1/cal.1.html
 cal --month &>/dev/null && return 1
 
 # old BSD implementation not supported
-# <http://www.openbsd.org/cgi-bin/man.cgi/OpenBSD-5.7/man1/cal.1>
+# http://www.openbsd.org/cgi-bin/man.cgi/OpenBSD-5.7/man1/cal.1
 cal -w &>/dev/null && return 1
 
-# dumb implementations with the -m month option not supported
-# <http://pubs.opengroup.org/onlinepubs/9699919799/utilities/cal.html>
+# dumb implementations without the -m month option not supported
+# http://pubs.opengroup.org/onlinepubs/9699919799/utilities/cal.html
 cal -m jan &>/dev/null || return 1
 
 function prezto_calendar_init
