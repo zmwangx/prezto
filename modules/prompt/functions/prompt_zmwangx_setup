@@ -43,7 +43,7 @@
 # \e[K  => clears everything after the cursor on the current line
 
 prompt_zmwangx_setup() {
-    setopt localoptions noshwordsplit
+    setopt localoptions noshwordsplit zle
 
     prompt_opts=(cr subst percent)
 
@@ -59,6 +59,10 @@ prompt_zmwangx_setup() {
     # hook up
     add-zsh-hook precmd prompt_zmwangx_precmd
     add-zsh-hook preexec prompt_zmwangx_preexec
+
+    # register ZLE widgets
+    zle -N prompt_zmwangx_record_buffer_lines
+    zle -N accept-line prompt_zmwangx_custom_accept_line
 
     # let us start on a clean line!
     PROMPT=''
@@ -90,6 +94,9 @@ prompt_zmwangx_precmd() {
 prompt_zmwangx_preexec() {
     setopt localoptions noshwordsplit
 
+    # refresh the preprompt one last time, primarily for the timestamp
+    prompt_zmwangx_preprompt_render 'preexec'
+
     prompt_zmwangx_cmd_timestamp=$EPOCHSECONDS
 }
 
@@ -100,8 +107,22 @@ prompt_zmwangx_string_length() {
     echo $(( ${#${(S%%)1//(\%([KF1]|)\{*\}|\%[Bbkf])}} - 1 ))
 }
 
+prompt_zmwangx_record_buffer_lines() {
+    if [[ $CONTEXT == 'start' ]]; then
+        prompt_zmwangx_buffer_lines=$BUFFERLINES
+        unset prompt_zmwangx_cannot_reliably_detect_buffer_lines
+    else
+        prompt_zmwangx_cannot_reliably_detect_buffer_lines=true
+    fi
+}
+
+prompt_zmwangx_custom_accept_line() {
+    prompt_zmwangx_record_buffer_lines
+    zle .accept-line
+}
+
 prompt_zmwangx_preprompt_render() {
-    setopt localoptions noshwordsplit noksharrays
+    setopt localoptions noshwordsplit noksharrays zle
 
     # check that no command is currently running, the prompt will otherwise be rendered in the wrong place
     [[ -n ${prompt_zmwangx_cmd_timestamp+x} && $1 != 'precmd' ]] && return
@@ -146,12 +167,19 @@ prompt_zmwangx_preprompt_render() {
     if [[ $1 == 'precmd' ]]; then
         print -P $preprompt
     else
-        # only redraw if prompt has changed
-        [[ $prompt_zmwangx_last_preprompt != $preprompt ]] || return
+        # only redraw if preexec or prompt has changed
+        [[ $1 == 'preexec' || $prompt_zmwangx_last_preprompt != $preprompt ]] || return
 
         # calculate length of preprompt for redraw purposes
         local preprompt_length=$(prompt_zmwangx_string_length $preprompt)
         local lines=$(( $preprompt_length / $COLUMNS + 1 ))
+        [[ -n $prompt_zmwangx_cannot_reliably_detect_buffer_lines ]] && return
+        if [[ $1 != 'preexec' ]]; then
+            zle prompt_zmwangx_record_buffer_lines
+            (( lines += prompt_zmwangx_buffer_lines - 1 ))
+        else
+            (( lines += prompt_zmwangx_buffer_lines ))
+        fi
 
         # disable clearing of line if last char of prompt is last column of terminal
         local clr='\e[K'
