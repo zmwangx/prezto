@@ -61,7 +61,8 @@ prompt_zmwangx_setup() {
     add-zsh-hook preexec prompt_zmwangx_preexec
 
     # register ZLE widgets
-    zle -N prompt_zmwangx_record_buffer_lines
+    zle -N prompt_zmwangx_accumulate_buffer_lines
+    zle -N prompt_zmwangx_calculate_cursor_line
     zle -N accept-line prompt_zmwangx_custom_accept_line
 
     # let us start on a clean line!
@@ -80,6 +81,9 @@ prompt_zmwangx_precmd() {
     # async functions are prevented from interfering with the initial preprompt
     # rendering
     prompt_zmwangx_cmd_timestamp=
+
+    # clear number of accumulated buffer lines
+    prompt_zmwangx_accumulated_buffer_lines=0
 
     # preform async git dirty check and fetch
     prompt_zmwangx_async_tasks
@@ -100,24 +104,36 @@ prompt_zmwangx_preexec() {
     prompt_zmwangx_cmd_timestamp=$EPOCHSECONDS
 }
 
-# string length ignoring ansi escapes
-prompt_zmwangx_string_length() {
+# string length (with prompt expansion) ignoring ansi escapes
+# assumption: the string $1 contains no newline
+prompt_zmwangx_prompt_string_length() {
     setopt localoptions noshwordsplit
-    # Subtract one since newline is counted as two characters
-    echo $(( ${#${(S%%)1//(\%([KF1]|)\{*\}|\%[Bbkf])}} - 1 ))
+    echo $(( ${#${(S%%)1//(\%([KF1]|)\{*\}|\%[Bbkf])}} ))
 }
 
-prompt_zmwangx_record_buffer_lines() {
-    if [[ $CONTEXT == 'start' ]]; then
-        prompt_zmwangx_buffer_lines=$BUFFERLINES
-        unset prompt_zmwangx_cannot_reliably_detect_buffer_lines
-    else
-        prompt_zmwangx_cannot_reliably_detect_buffer_lines=true
-    fi
+prompt_zmwangx_accumulate_buffer_lines() {
+    # assumes that PS1 and PS2 aren't long enough to span multiple lines
+    (( prompt_zmwangx_accumulated_buffer_lines += BUFFERLINES ))
+}
+
+# calculate the line where the cursor is on (indexed from zero), counting from
+# the beginning of the current buffer, PS1/PS2 included (assuming the buffer
+# itself is not colored)
+#
+# sets the global parameter prompt_zmwangx_cursor_line
+prompt_zmwangx_calculate_cursor_line() {
+    local ps_length
+    case $CONTEXT in
+        start) ps_length=$(prompt_zmwangx_prompt_string_length $PS1);;
+        cont) ps_length=$(prompt_zmwangx_prompt_string_length $PS2);;
+        *) ps_length=0;;
+    esac
+    local cursor_pos=$(( ps_length + CURSOR ))
+    prompt_zmwangx_cursor_line=$(( cursor_pos / COLUMNS ))
 }
 
 prompt_zmwangx_custom_accept_line() {
-    prompt_zmwangx_record_buffer_lines
+    prompt_zmwangx_accumulate_buffer_lines
     zle .accept-line
 }
 
@@ -165,20 +181,19 @@ prompt_zmwangx_preprompt_render() {
 
     # if executing through precmd, do not perform fancy terminal editing
     if [[ $1 == 'precmd' ]]; then
-        print -P $preprompt
+        print -P "\n$preprompt"
     else
         # only redraw if preexec or prompt has changed
         [[ $1 == 'preexec' || $prompt_zmwangx_last_preprompt != $preprompt ]] || return
 
         # calculate length of preprompt for redraw purposes
-        local preprompt_length=$(prompt_zmwangx_string_length $preprompt)
+        local preprompt_length=$(prompt_zmwangx_prompt_string_length $preprompt)
         local lines=$(( $preprompt_length / $COLUMNS + 1 ))
-        [[ -n $prompt_zmwangx_cannot_reliably_detect_buffer_lines ]] && return
         if [[ $1 != 'preexec' ]]; then
-            zle prompt_zmwangx_record_buffer_lines
-            (( lines += prompt_zmwangx_buffer_lines - 1 ))
+            zle prompt_zmwangx_calculate_cursor_line
+            (( lines += prompt_zmwangx_accumulated_buffer_lines + prompt_zmwangx_cursor_line ))
         else
-            (( lines += prompt_zmwangx_buffer_lines ))
+            (( lines += prompt_zmwangx_accumulated_buffer_lines ))
         fi
 
         # disable clearing of line if last char of prompt is last column of terminal
