@@ -188,7 +188,7 @@ prompt_zmwangx_preprompt_render() {
 
         # calculate length of preprompt for redraw purposes
         local preprompt_length=$(prompt_zmwangx_prompt_string_length $preprompt)
-        local lines=$(( $preprompt_length / $COLUMNS + 1 ))
+        local lines=$(( ($preprompt_length - 1) / $COLUMNS + 1 ))
         if [[ $1 != 'preexec' ]]; then
             zle prompt_zmwangx_calculate_cursor_line
             (( lines += prompt_zmwangx_accumulated_buffer_lines + prompt_zmwangx_cursor_line ))
@@ -198,7 +198,7 @@ prompt_zmwangx_preprompt_render() {
 
         # disable clearing of line if last char of prompt is last column of terminal
         local clr='\e[K'
-        (( $preprompt_length * $lines == $COLUMNS - 1 )) && clr=''
+        (( $COLUMNS * $lines == $preprompt_length )) && clr=''
 
         # modify previous prompt
         print -Pn "\e7\e[${lines}A\e[1G${preprompt}${clr}\e8"
