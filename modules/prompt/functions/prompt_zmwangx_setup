@@ -45,7 +45,7 @@
 prompt_zmwangx_setup() {
     setopt localoptions noshwordsplit zle
 
-    prompt_opts=(cr subst percent)
+    prompt_opts=(subst percent)
 
     zmodload zsh/datetime
     pmodload async
