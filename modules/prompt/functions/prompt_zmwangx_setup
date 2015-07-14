@@ -289,9 +289,9 @@ prompt_zmwangx_async_git_dirty() {
     cd -q "$*"
 
     if [[ $untracked_dirty == no ]]; then
-        command git diff --no-ext-diff --quiet --exit-code
+        command git diff --no-ext-diff --quiet --exit-code 2>/dev/null
     else
-        test -z "$(command git status --porcelain --untracked-files=normal)"
+        test -z "$(command git status --porcelain --untracked-files=normal 2>/dev/null)"
     fi
 
     (( $? )) && echo "*"
