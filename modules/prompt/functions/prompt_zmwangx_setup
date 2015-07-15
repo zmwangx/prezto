@@ -45,7 +45,7 @@
 prompt_zmwangx_setup() {
     setopt localoptions noshwordsplit zle
 
-    prompt_opts=(subst percent)
+    prompt_opts=(cr subst percent)
 
     zmodload zsh/datetime
     pmodload async
@@ -181,7 +181,7 @@ prompt_zmwangx_preprompt_render() {
 
     # if executing through precmd, do not perform fancy terminal editing
     if [[ $1 == 'precmd' ]]; then
-        print -P "\n$preprompt"
+        print -P "$preprompt"
     else
         # only redraw if preexec or prompt has changed
         [[ $1 == 'preexec' || $prompt_zmwangx_last_preprompt != $preprompt ]] || return
