@@ -64,6 +64,7 @@ prompt_zmwangx_setup() {
     zle -N prompt_zmwangx_accumulate_buffer_lines
     zle -N prompt_zmwangx_calculate_cursor_line
     zle -N accept-line prompt_zmwangx_custom_accept_line
+    zle -N clear-screen prompt_zmwangx_custom_clear_screen
 
     # let us start on a clean line!
     PROMPT=''
@@ -135,6 +136,15 @@ prompt_zmwangx_calculate_cursor_line() {
 prompt_zmwangx_custom_accept_line() {
     prompt_zmwangx_accumulate_buffer_lines
     zle .accept-line
+}
+
+prompt_zmwangx_custom_clear_screen() {
+    # enable output to terminal from ZLE
+    zle -I
+    # clear screen and move to (0, 0)
+    print -n "\e[2J\e[0;0H"
+    # print precmd
+    prompt_zmwangx_preprompt_render precmd
 }
 
 prompt_zmwangx_preprompt_render() {
