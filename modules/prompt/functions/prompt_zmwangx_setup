@@ -29,6 +29,11 @@
 #                    Default is 'yes'. 'no' is only really useful in huge
 #                    repos.
 #
+# There is a style for debugging, 'debug' under
+# ':prezto:module:prompt:zmwangx', which adds a ticker (updated every second)
+# and additional debugging info to the preprompt. Credit to @mafredri for the
+# idea of a ticker; this is pure genius!
+#
 # #############################################################################
 #
 # Authors:
@@ -101,6 +106,9 @@ prompt_zmwangx_precmd() {
 
     # clear number of accumulated buffer lines
     prompt_zmwangx_accumulated_buffer_lines=0
+
+    # unset various states
+    unset prompt_zmwangx_cursor_position_lines prompt_zmwangx_cursor_position_columns prompt_zmwangx_ps_length prompt_zmwangx_tick
 
     # preform async git dirty check and fetch
     prompt_zmwangx_async_tasks
@@ -224,6 +232,15 @@ prompt_zmwangx_preprompt_render() {
     # construct prompt, beginning with path
     preprompt="$rootseg$hostseg$timeseg$pathseg$gitseg$pythonseg$jobseg$promptseg"
 
+    # debugging info
+    if zstyle -t ':prezto:module:prompt:zmwangx' debug; then
+        [[ -n $prompt_zmwangx_tick ]] && preprompt+=" $prompt_zmwangx_tick"
+        [[ -n $prompt_zmwangx_cursor_position_lines ]] && preprompt+=" lin:$prompt_zmwangx_cursor_position_lines"
+        [[ -n $prompt_zmwangx_cursor_position_columns ]] && preprompt+=" col:$prompt_zmwangx_cursor_position_columns"
+        [[ -n $prompt_zmwangx_accumulated_buffer_lines ]] && preprompt+=" accumulated:$prompt_zmwangx_accumulated_buffer_lines"
+        [[ -n $prompt_zmwangx_ps_length ]] && preprompt+=" prompt_ps:$prompt_zmwangx_ps_length"
+    fi
+
     # if executing through precmd, do not perform fancy terminal editing
     if [[ $1 == 'precmd' ]]; then
         print -P "$preprompt"
@@ -264,6 +281,12 @@ prompt_zmwangx_async_tasks() {
         async_register_callback 'prompt_zmwangx' prompt_zmwangx_async_callback
         prompt_zmwangx_async_init=1
     }
+
+    # start ticker
+    if zstyle -t ':prezto:module:prompt:zmwangx' debug; then
+        prompt_zmwangx_tick=0
+        async_job 'prompt_zmwangx' prompt_zmwangx_async_ticker
+    fi
 
     # get the current git working tree, empty if not inside a git directory
     local working_tree="$(command git rev-parse --show-toplevel 2>/dev/null)"
@@ -310,7 +333,7 @@ prompt_zmwangx_async_callback() {
     local output=$3
     local exec_time=$4
 
-    case "${job}" in
+    case $job in
         prompt_zmwangx_async_git_dirty)
             prompt_zmwangx_git_dirty=$output
             prompt_zmwangx_preprompt_render
@@ -322,6 +345,11 @@ prompt_zmwangx_async_callback() {
             ;;
         prompt_zmwangx_async_git_fetch)
             prompt_zmwangx_preprompt_render
+            ;;
+        prompt_zmwangx_async_ticker)
+            (( prompt_zmwangx_tick += output ))
+            prompt_zmwangx_preprompt_render
+            async_job 'prompt_zmwangx' prompt_zmwangx_async_ticker
             ;;
     esac
 }
@@ -352,6 +380,11 @@ prompt_zmwangx_async_git_fetch() {
 
     # set GIT_TERMINAL_PROMPT=0 to disable auth prompting for git fetch (git 2.3+)
     GIT_TERMINAL_PROMPT=0 command git -c gc.auto=0 fetch
+}
+
+prompt_zmwangx_async_ticker() {
+    sleep 1
+    print 1
 }
 
 prompt_zmwangx_setup "$@"
