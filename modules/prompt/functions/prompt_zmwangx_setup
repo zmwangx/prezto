@@ -290,6 +290,9 @@ prompt_zmwangx_async_tasks() {
         # stop any running async jobs
         async_flush_jobs 'prompt_zmwangx'
 
+        # wait 0.1 seconds for the jobs to be fully flushed if we are running a ticker
+        zstyle -t ':prezto:module:prompt:zmwangx' debug && sleep 0.1
+
         # reset git preprompt variables, switching working tree
         unset prompt_zmwangx_git_dirty
         unset prompt_zmwangx_git_last_dirty_check_timestamp
