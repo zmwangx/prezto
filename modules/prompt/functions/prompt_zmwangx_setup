@@ -282,12 +282,6 @@ prompt_zmwangx_async_tasks() {
         prompt_zmwangx_async_init=1
     }
 
-    # start ticker
-    if zstyle -t ':prezto:module:prompt:zmwangx' debug; then
-        prompt_zmwangx_tick=0
-        async_job 'prompt_zmwangx' prompt_zmwangx_async_ticker
-    fi
-
     # get the current git working tree, empty if not inside a git directory
     local working_tree="$(command git rev-parse --show-toplevel 2>/dev/null)"
 
@@ -302,6 +296,12 @@ prompt_zmwangx_async_tasks() {
 
         # set the new working tree and prefix with "x" to prevent the creation of a named path by AUTO_NAME_DIRS
         prompt_zmwangx_current_working_tree="x${working_tree}"
+    fi
+
+    # start ticker
+    if zstyle -t ':prezto:module:prompt:zmwangx' debug; then
+        prompt_zmwangx_tick=0
+        async_job 'prompt_zmwangx' prompt_zmwangx_async_ticker
     fi
 
     # only perform tasks inside git working tree
