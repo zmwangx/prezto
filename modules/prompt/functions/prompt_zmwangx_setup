@@ -48,7 +48,7 @@
 # \e[K  => clears everything after the cursor on the current line
 
 prompt_zmwangx_setup() {
-    setopt localoptions noshwordsplit zle
+    setopt localoptions noshwordsplit
 
     prompt_opts=(cr subst percent)
 
@@ -65,17 +65,6 @@ prompt_zmwangx_setup() {
     add-zsh-hook precmd prompt_zmwangx_precmd
     add-zsh-hook preexec prompt_zmwangx_preexec
 
-    # rebind user customized standard widgets
-    (( $+widgets[zle-line-init] )) && zle -A zle-line-init prompt_zmwangx_user_line_init
-    (( $+widgets[zle-line-finish] )) && zle -A zle-line-finish prompt_zmwangx_user_line_finish
-
-    # register ZLE widgets
-    zle -N prompt_zmwangx_accumulate_buffer_lines
-    zle -N prompt_zmwangx_calculate_cursor_position
-    zle -N zle-line-init prompt_zmwangx_custom_line_init
-    zle -N zle-line-finish prompt_zmwangx_custom_line_finish
-    zle -N clear-screen prompt_zmwangx_custom_clear_screen
-
     # let us start on a clean line!
     PROMPT=''
 }
@@ -87,6 +76,9 @@ prompt_zmwangx_precmd() {
     prompt_zmwangx_last_cmd_exit_status=$?
 
     setopt localoptions noshwordsplit
+
+    # do ZLE-related initializations if we haven't yet done so
+    [[ -n $prompt_zmwangx_zle_initialized ]] || prompt_zmwangx_zle_init
 
     # by making sure that prompt_zmwangx_cmd_timestamp is defined here the
     # async functions are prevented from interfering with the initial preprompt
@@ -123,6 +115,23 @@ prompt_zmwangx_preexec() {
 prompt_zmwangx_prompt_string_length() {
     setopt localoptions noshwordsplit
     echo ${#${(S%%)1//(\%([KF1]|)\{*\}|\%[Bbkf])}}
+}
+
+prompt_zmwangx_zle_init() {
+    setopt localoptions noshwordsplit zle
+
+    # rebind user customized standard widgets
+    (( $+widgets[zle-line-init] )) && zle -A zle-line-init prompt_zmwangx_user_line_init
+    (( $+widgets[zle-line-finish] )) && zle -A zle-line-finish prompt_zmwangx_user_line_finish
+
+    # register ZLE widgets
+    zle -N prompt_zmwangx_accumulate_buffer_lines
+    zle -N prompt_zmwangx_calculate_cursor_position
+    zle -N zle-line-init prompt_zmwangx_custom_line_init
+    zle -N zle-line-finish prompt_zmwangx_custom_line_finish
+    zle -N clear-screen prompt_zmwangx_custom_clear_screen
+
+    prompt_zmwangx_zle_initialized=true
 }
 
 prompt_zmwangx_accumulate_buffer_lines() {
