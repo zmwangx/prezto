@@ -65,11 +65,9 @@ prompt_zmwangx_setup() {
     add-zsh-hook precmd prompt_zmwangx_precmd
     add-zsh-hook preexec prompt_zmwangx_preexec
 
-    # save user customizations to standard widgets we need
-    prompt_zmwangx_user_zle_line_init=$(prompt_zmwangx_user_customized_widget zle-line-init)
-    prompt_zmwangx_user_zle_line_finish=$(prompt_zmwangx_user_customized_widget zle-line-finish)
-    [[ -n $prompt_zmwangx_user_zle_line_init ]] && zle -N prompt_zmwangx_user_zle_line_init $prompt_zmwangx_user_zle_line_init
-    [[ -n $prompt_zmwangx_user_zle_line_finish ]] && zle -N prompt_zmwangx_user_zle_line_finish $prompt_zmwangx_user_zle_line_finish
+    # rebind user customized standard widgets
+    (( $+widgets[zle-line-init] )) && zle -A zle-line-init prompt_zmwangx_user_line_init
+    (( $+widgets[zle-line-finish] )) && zle -A zle-line-finish prompt_zmwangx_user_line_finish
 
     # register ZLE widgets
     zle -N prompt_zmwangx_accumulate_buffer_lines
@@ -80,15 +78,6 @@ prompt_zmwangx_setup() {
 
     # let us start on a clean line!
     PROMPT=''
-}
-
-# print the widget function if it is user-customized, otherwise print nothing
-prompt_zmwangx_user_customized_widget() {
-    registered=$widgets[$1]
-    case $registered in
-        user:*) print -n ${registered#user:};;
-        *) ;;
-    esac
 }
 
 prompt_zmwangx_precmd() {
@@ -150,19 +139,17 @@ prompt_zmwangx_custom_line_init() {
         *) prompt_zmwangx_ps_length=0;;
     esac
 
-    # The reason we register the user customization as a ZLE widget and then
-    # execute is because directly calling the function might result in
-    # unexpected execution context change, and combined with zle -R that user
-    # customization might call, might lead to wrong PS2 printing.
-    (( $+widgets[prompt_zmwangx_user_zle_line_init] )) || return
-    zle prompt_zmwangx_user_zle_line_init
+    # be extra careful not to change the parser context
+    (( $+widgets[prompt_zmwangx_user_line_init] )) || return
+    zle prompt_zmwangx_user_line_init
 }
 
 prompt_zmwangx_custom_line_finish() {
     (( prompt_zmwangx_accumulated_buffer_lines += prompt_pure_ps_length / COLUMNS + BUFFERLINES ))
 
-    (( $+widgets[prompt_zmwangx_user_zle_line_finish] )) || return
-    zle prompt_zmwangx_user_zle_line_finish
+    # be extra careful not to change the parser context
+    (( $+widgets[prompt_zmwangx_user_line_finish] )) || return
+    zle prompt_zmwangx_user_line_finish
 }
 
 prompt_zmwangx_custom_clear_screen() {
