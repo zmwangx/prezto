@@ -60,14 +60,30 @@ prompt_zmwangx_setup() {
     add-zsh-hook precmd prompt_zmwangx_precmd
     add-zsh-hook preexec prompt_zmwangx_preexec
 
+    # save user customizations to standard widgets we need
+    prompt_zmwangx_user_zle_line_init=$(prompt_zmwangx_user_customized_widget zle-line-init)
+    prompt_zmwangx_user_zle_line_finish=$(prompt_zmwangx_user_customized_widget zle-line-finish)
+    [[ -n $prompt_zmwangx_user_zle_line_init ]] && zle -N prompt_zmwangx_user_zle_line_init $prompt_zmwangx_user_zle_line_init
+    [[ -n $prompt_zmwangx_user_zle_line_finish ]] && zle -N prompt_zmwangx_user_zle_line_finish $prompt_zmwangx_user_zle_line_finish
+
     # register ZLE widgets
     zle -N prompt_zmwangx_accumulate_buffer_lines
-    zle -N prompt_zmwangx_calculate_cursor_line
-    zle -N accept-line prompt_zmwangx_custom_accept_line
+    zle -N prompt_zmwangx_calculate_cursor_position
+    zle -N zle-line-init prompt_zmwangx_custom_line_init
+    zle -N zle-line-finish prompt_zmwangx_custom_line_finish
     zle -N clear-screen prompt_zmwangx_custom_clear_screen
 
     # let us start on a clean line!
     PROMPT=''
+}
+
+# print the widget function if it is user-customized, otherwise print nothing
+prompt_zmwangx_user_customized_widget() {
+    registered=$widgets[$1]
+    case $registered in
+        user:*) print -n ${registered#user:};;
+        *) ;;
+    esac
 }
 
 prompt_zmwangx_precmd() {
@@ -117,25 +133,28 @@ prompt_zmwangx_accumulate_buffer_lines() {
     (( prompt_zmwangx_accumulated_buffer_lines += BUFFERLINES ))
 }
 
-# calculate the line where the cursor is on (indexed from zero), counting from
-# the beginning of the current buffer, PS1/PS2 included (assuming the buffer
-# itself is not colored)
-#
-# sets the global parameter prompt_zmwangx_cursor_line
-prompt_zmwangx_calculate_cursor_line() {
-    local ps_length
+prompt_zmwangx_custom_line_init() {
+    local ps1_length=${#${(S%%)PS1//(\%([KF1]|)\{*\}|\%[Bbkf])}}
+    local ps2_length=${#${(S%%)PS2//(\%([KF1]|)\{*\}|\%[Bbkf])}}
     case $CONTEXT in
-        start) ps_length=$(prompt_zmwangx_prompt_string_length $PS1);;
-        cont) ps_length=$(prompt_zmwangx_prompt_string_length $PS2);;
-        *) ps_length=0;;
+        start) prompt_zmwangx_ps_length=$ps1_length;;
+        cont) prompt_zmwangx_ps_length=$ps2_length;;
+        *) prompt_zmwangx_ps_length=0;;
     esac
-    local cursor_pos=$(( ps_length + CURSOR ))
-    prompt_zmwangx_cursor_line=$(( cursor_pos / COLUMNS ))
+
+    # The reason we register the user customization as a ZLE widget and then
+    # execute is because directly calling the function might result in
+    # unexpected execution context change, and combined with zle -R that user
+    # customization might call, might lead to wrong PS2 printing.
+    (( $+widgets[prompt_zmwangx_user_zle_line_init] )) || return
+    zle prompt_zmwangx_user_zle_line_init
 }
 
-prompt_zmwangx_custom_accept_line() {
-    prompt_zmwangx_accumulate_buffer_lines
-    zle .accept-line
+prompt_zmwangx_custom_line_finish() {
+    (( prompt_zmwangx_accumulated_buffer_lines += prompt_pure_ps_length / COLUMNS + BUFFERLINES ))
+
+    (( $+widgets[prompt_zmwangx_user_zle_line_finish] )) || return
+    zle prompt_zmwangx_user_zle_line_finish
 }
 
 prompt_zmwangx_custom_clear_screen() {
@@ -145,6 +164,22 @@ prompt_zmwangx_custom_clear_screen() {
     print -n "\e[2J\e[0;0H"
     # print precmd
     prompt_zmwangx_preprompt_render precmd
+}
+
+# sets prompt_zmwangx_cursor_position_lines and prompt_zmwangx_cursor_position_columns, which are indexed from one
+prompt_zmwangx_calculate_cursor_position() {
+    setopt localoptions noshwordsplit noksharrays zle
+
+    local line_prefix_length=$prompt_zmwangx_ps_length
+    prompt_zmwangx_cursor_position_lines=$prompt_zmwangx_accumulated_buffer_lines
+    local line="" line_length=line_prefix_length
+    for line in "${(@f)LBUFFER}"; do
+        (( line_length = line_prefix_length + $#line ))
+        (( prompt_zmwangx_cursor_position_lines += line_length / COLUMNS + 1 ))
+        # only the first line in lbuffer get the prefix (PS1/PS2)
+        line_prefix_length=0
+    done
+    (( prompt_zmwangx_cursor_position_columns = line_length % COLUMNS ))
 }
 
 prompt_zmwangx_preprompt_render() {
@@ -199,9 +234,11 @@ prompt_zmwangx_preprompt_render() {
         # calculate length of preprompt for redraw purposes
         local preprompt_length=$(prompt_zmwangx_prompt_string_length $preprompt)
         local lines=$(( ($preprompt_length - 1) / $COLUMNS + 1 ))
+
+        # add number of lines took up by the commmand line buffers
         if [[ $1 != 'preexec' ]]; then
-            zle prompt_zmwangx_calculate_cursor_line
-            (( lines += prompt_zmwangx_accumulated_buffer_lines + prompt_zmwangx_cursor_line ))
+            zle prompt_zmwangx_calculate_cursor_position
+            (( lines += prompt_zmwangx_cursor_position_lines - 1 ))
         else
             (( lines += prompt_zmwangx_accumulated_buffer_lines ))
         fi
