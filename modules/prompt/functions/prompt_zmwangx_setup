@@ -65,6 +65,9 @@ prompt_zmwangx_setup() {
     add-zsh-hook precmd prompt_zmwangx_precmd
     add-zsh-hook preexec prompt_zmwangx_preexec
 
+    # hook into compsys
+    comppostfuncs+=(prompt_zmwangx_preprompt_offscreen_guard)
+
     # let us start on a clean line!
     PROMPT=''
 }
@@ -186,8 +189,39 @@ prompt_zmwangx_calculate_cursor_position() {
     (( prompt_zmwangx_cursor_position_columns = line_length % COLUMNS ))
 }
 
+# This function is used in comppostfuncs only, and sets the
+# prompt_zmwangx_preprompt_offscreen to true if it decides that the preprompt
+# will probably be pushed offscreen by completion listing.
+#
+# This function auto inserts itself into comppostfuncs.
+prompt_zmwangx_preprompt_offscreen_guard() {
+    setopt localoptions noshwordsplit noksharrays
+
+    # Compare the sum of the following three with the total number of lines available (i.e., LINES):
+    #
+    # * Potential number of lines occupied by preprompt;
+    # * Total number of lines occupied by the current command line (possibly multiline);
+    # * Potential number of lines occupied by completion listing.
+
+    # use prompt_zmwangx_last_preprompt_lines + 1 because occasionally the next preprompt will occupy one more line
+    local preprompt_lines=$(( prompt_zmwangx_last_preprompt_lines + 1 ))
+    local command_line_lines=$(( prompt_zmwangx_accumulated_buffer_lines + prompt_pure_ps_length / COLUMNS + BUFFERLINES ))
+    local completion_lines=$compstate[list_lines]
+
+    (( preprompt_lines + command_line_lines + completion_lines > LINES )) && prompt_zmwangx_preprompt_offscreen=true
+
+    # persist
+    comppostfuncs+=(prompt_zmwangx_preprompt_offscreen_guard)
+}
+
 prompt_zmwangx_preprompt_render() {
     setopt localoptions noshwordsplit noksharrays zle
+
+    # clear prompt_zmwangx_preprompt flag if running in precmd context
+    [[ $1 == 'precmd' ]] && unset prompt_zmwangx_preprompt_offscreen
+
+    # abort without rendering if prompt_zmwangx_preprompt_offscreen is set
+    [[ $prompt_zmwangx_preprompt_offscreen == true ]] && return
 
     # check that no command is currently running, the prompt will otherwise be rendered in the wrong place
     [[ -n ${prompt_zmwangx_cmd_timestamp+x} && $1 != 'precmd' ]] && return
