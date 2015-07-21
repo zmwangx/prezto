@@ -22,3 +22,6 @@
 [submodule "modules/async/external"]
 	path = modules/async/external
 	url = git@github.com:mafredri/zsh-async.git
+[submodule "modules/autosuggestions/external"]
+	path = modules/autosuggestions/external
+	url = git@github.com:zmwangx/zsh-autosuggestions.git
