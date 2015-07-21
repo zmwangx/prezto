@@ -181,6 +181,8 @@ prompt_zmwangx_calculate_cursor_position() {
     prompt_zmwangx_cursor_position_lines=$prompt_zmwangx_accumulated_buffer_lines
     local line="" line_length=line_prefix_length
     for line in "${(@f)LBUFFER}"; do
+        # expand raw tabs in line to eight spaces
+        line=${line//$'\t'/        }
         (( line_length = line_prefix_length + $#line ))
         (( prompt_zmwangx_cursor_position_lines += line_length / COLUMNS + 1 ))
         # only the first line in lbuffer get the prefix (PS1/PS2)
