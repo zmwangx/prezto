@@ -237,6 +237,10 @@ prompt_zmwangx_preprompt_render() {
         [[ -n $prompt_zmwangx_ps_length ]] && preprompt+=" prompt_ps:$prompt_zmwangx_ps_length"
     fi
 
+    # calculate length and occupied number of lengths of preprompt
+    local preprompt_length=$(prompt_zmwangx_prompt_string_length $preprompt)
+    local preprompt_lines=$(( (preprompt_length - 1) / COLUMNS + 1 ))
+
     # if executing through precmd, do not perform fancy terminal editing
     if [[ $1 == 'precmd' ]]; then
         print -P "$preprompt"
@@ -244,28 +248,26 @@ prompt_zmwangx_preprompt_render() {
         # only redraw if preexec or prompt has changed
         [[ $1 == 'preexec' || $prompt_zmwangx_last_preprompt != $preprompt ]] || return
 
-        # calculate length of preprompt for redraw purposes
-        local preprompt_length=$(prompt_zmwangx_prompt_string_length $preprompt)
-        local lines=$(( (preprompt_length - 1) / COLUMNS + 1 ))
+        # disable clearing of line if last char of preprompt is last column of terminal
+        local clr='\e[K'
+        (( COLUMNS * preprompt_lines == preprompt_length )) && clr=''
 
-        # add number of lines took up by the commmand line buffers
+        # calculate the total of number of lines to move up in order to write the updated preprompt
+        local lines_total=$preprompt_lines
         if [[ $1 != 'preexec' ]]; then
             zle prompt_zmwangx_calculate_cursor_position
-            (( lines += prompt_zmwangx_cursor_position_lines - 1 ))
+            (( lines_total += prompt_zmwangx_cursor_position_lines - 1 ))
         else
-            (( lines += prompt_zmwangx_accumulated_buffer_lines ))
+            (( lines_total += prompt_zmwangx_accumulated_buffer_lines ))
         fi
 
-        # disable clearing of line if last char of prompt is last column of terminal
-        local clr='\e[K'
-        (( COLUMNS * lines == preprompt_length )) && clr=''
-
-        # modify previous prompt
-        print -Pn "\e7\e[${lines}A\e[1G${preprompt}${clr}\e8"
+        # write preprompt only if we aren't moving off screen
+        (( lines_total < LINES )) && print -Pn "\e7\e[${lines_total}A\e[1G${preprompt}${clr}\e8"
     fi
 
-    # store previous prompt for comparison
+    # store previous prompt and the number of lines it occupies
     prompt_zmwangx_last_preprompt=$preprompt
+    prompt_zmwangx_last_preprompt_lines=$preprompt_lines
 }
 
 prompt_zmwangx_async_tasks() {
