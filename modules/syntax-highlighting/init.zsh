@@ -5,13 +5,14 @@
 #   Sorin Ionescu <sorin.ionescu@gmail.com>
 #
 
-# Return if requirements are not found.
-if ! zstyle -t ':prezto:module:syntax-highlighting' color; then
-  return 1
-fi
-
 # Source module files.
 source "${0:h}/external/zsh-syntax-highlighting.zsh" || return 1
+
+# Clear highlighters and return if coloring is disabled.
+if ! zstyle -t ':prezto:module:syntax-highlighting' color; then
+  ZSH_HIGHLIGHT_HIGHLIGHTERS=()
+  return 1
+fi
 
 # Set highlighters.
 zstyle -a ':prezto:module:syntax-highlighting' highlighters 'ZSH_HIGHLIGHT_HIGHLIGHTERS'
