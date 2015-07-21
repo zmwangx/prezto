@@ -10,9 +10,9 @@ function complete_pwd_items_on_empty_buffer
     if [[ $BUFFER =~ ^[[:space:]]*$ ]]; then
         BUFFER+="./"
         CURSOR+=2
-        zle list-choices
+        zle .list-choices
     else
-        zle expand-or-complete
+        zle .expand-or-complete
     fi
 }
 
