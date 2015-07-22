@@ -1,3 +1,3 @@
 # use zsh/Functions/Misc/run-help rather than the lame alias to man
-unalias run-help
+(( $+aliases[run-help] )) && unalias run-help
 autoload -Uz run-help
