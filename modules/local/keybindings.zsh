@@ -15,3 +15,4 @@ bindkey "^S" history-incremental-search-forward
 
 # bind keys to custom widgets
 bindkey '^I' complete_pwd_items_on_empty_buffer
+bindkey '^[p' vanilla_path
