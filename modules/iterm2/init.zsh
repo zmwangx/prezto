@@ -5,8 +5,11 @@
 # information about iTerm 2's shell integration can be found on
 # https://iterm2.com/shell_integration.html.
 #
+# Improved by Zhiming Wang.
+#
 # Authors:
 #   George Nachman <gnachman@gmail.com>
+#   Zhiming Wang <zmwangx@gmail.com>
 #
 
 if [[ -o login ]]; then
@@ -40,23 +43,15 @@ if [[ -o login ]]; then
       iterm2_print_state_data
     }
 
-    # Mark start of prompt
-    iterm2_prompt_start() {
-      printf "\033]133;A\007"
-    }
-
-    # Mark end of prompt
-    iterm2_prompt_end() {
-      printf "\033]133;B\007"
-    }
-
     iterm2_precmd() {
       iterm2_after_cmd_executes
 
       # The user or another precmd may have changed PS1 (e.g., powerline-shell).
       # Ensure that our escape sequences are added back in.
       ITERM2_SAVED_PS1="$PS1"
-      PS1="%{$(iterm2_prompt_start)%}$ITERM2_SAVED_PS1%{$(iterm2_prompt_end)%}"
+      local iterm2_prompt_start_marker=$'\033]133;A\007'
+      local iterm2_prompt_end_marker=$'\033]133;B\007'
+      PS1="%{${iterm2_prompt_start_marker}%}${ITERM2_SAVED_PS1}%{${iterm2_prompt_end_marker}%}"
     }
 
     iterm2_preexec() {
@@ -65,13 +60,11 @@ if [[ -o login ]]; then
     }
 
     # If hostname -f is slow on your system, set iterm2_hostname prior to sourcing this script.
-    [[ -z "$iterm2_hostname" ]] && iterm2_hostname=`hostname -f`
+    [[ -z $iterm2_hostname ]] && iterm2_hostname=$(hostname -f)
 
-    [[ -z $precmd_functions ]] && precmd_functions=()
-    precmd_functions=($precmd_functions iterm2_precmd)
-
-    [[ -z $preexec_functions ]] && preexec_functions=()
-    preexec_functions=($preexec_functions iterm2_preexec)
+    # hook up
+    add-zsh-hook precmd iterm2_precmd
+    add-zsh-hook preexec iterm2_preexec
 
     iterm2_print_state_data
     printf "\033]1337;ShellIntegrationVersion=1\007"
