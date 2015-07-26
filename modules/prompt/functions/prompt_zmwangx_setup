@@ -113,11 +113,13 @@ prompt_zmwangx_preexec() {
     prompt_zmwangx_cmd_timestamp=$EPOCHSECONDS
 }
 
-# string length (with prompt expansion) ignoring ansi escapes
-# assumption: the string $1 contains no newline
-prompt_zmwangx_prompt_string_length() {
+# save the length of the string $1 to a global parameter named $2
+#
+# the string $1 undergoes prompt expansion, and ANSI escapes are stripped
+prompt_zmwangx_prompt_string_length_to_var() {
     setopt localoptions noshwordsplit
-    echo ${#${(S%%)1//(\%([KF1]|)\{*\}|\%[Bbkf])}}
+    local length=${#${(S%%)1//(\%([KF1]|)\{*\}|\%[Bbkf])}}
+    typeset -g $2=$length
 }
 
 prompt_zmwangx_zle_init() {
@@ -274,7 +276,8 @@ prompt_zmwangx_preprompt_render() {
     fi
 
     # calculate length and occupied number of lengths of preprompt
-    local preprompt_length=$(prompt_zmwangx_prompt_string_length $preprompt)
+    local preprompt_length
+    prompt_zmwangx_prompt_string_length_to_var $preprompt "preprompt_length"
     local preprompt_lines=$(( (preprompt_length - 1) / COLUMNS + 1 ))
 
     # if executing through precmd, do not perform fancy terminal editing
