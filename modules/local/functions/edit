@@ -9,7 +9,7 @@ function edit
 {
     function launch_editor
     {
-        ${EDITOR:-emacs} $1
+        ${VISUAL:-emacs} $1
     }
 
     function is_text
