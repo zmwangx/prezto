@@ -159,7 +159,7 @@ prompt_zmwangx_custom_line_init() {
 }
 
 prompt_zmwangx_custom_line_finish() {
-    (( prompt_zmwangx_accumulated_buffer_lines += prompt_pure_ps_length / COLUMNS + BUFFERLINES ))
+    (( prompt_zmwangx_accumulated_buffer_lines += prompt_zmwangx_ps_length / COLUMNS + BUFFERLINES ))
 
     # be extra careful not to change the parser context
     (( $+widgets[prompt_zmwangx_user_line_finish] )) || return
@@ -209,7 +209,7 @@ prompt_zmwangx_preprompt_offscreen_guard() {
 
     # use prompt_zmwangx_last_preprompt_lines + 1 because occasionally the next preprompt will occupy one more line
     local preprompt_lines=$(( prompt_zmwangx_last_preprompt_lines + 1 ))
-    local command_line_lines=$(( prompt_zmwangx_accumulated_buffer_lines + prompt_pure_ps_length / COLUMNS + BUFFERLINES ))
+    local command_line_lines=$(( prompt_zmwangx_accumulated_buffer_lines + prompt_zmwangx_ps_length / COLUMNS + BUFFERLINES ))
     local completion_lines=$compstate[list_lines]
 
     (( preprompt_lines + command_line_lines + completion_lines > LINES )) && prompt_zmwangx_preprompt_offscreen=true
