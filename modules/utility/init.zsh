@@ -60,7 +60,6 @@ alias mv="${aliases[mv]:-mv} -i"
 alias p='${(z)PAGER}'
 alias po='popd'
 alias pu='pushd'
-alias rm="${aliases[rm]:-rm} -i"
 alias type='type -a'
 
 # ls
