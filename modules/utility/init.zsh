@@ -8,7 +8,7 @@
 #
 
 # Load dependencies.
-pmodload 'helper' 'spectrum'
+pmodload 'helper' 'colors'
 
 # Correct commands.
 if zstyle -t ':prezto:module:utility' correct; then

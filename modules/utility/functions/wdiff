@@ -10,10 +10,10 @@ function wdiff {
     if (( $+commands[wdiff] )); then
       command wdiff \
         --avoid-wraps \
-        --start-delete="$(print -n $FG[red])" \
-        --end-delete="$(print -n $FG[none])" \
-        --start-insert="$(print -n $FG[green])" \
-        --end-insert="$(print -n $FG[none])" \
+        --start-delete="$(print -n $RED)" \
+        --end-delete="$(print -n $RESET)" \
+        --start-insert="$(print -n $GREEN)" \
+        --end-insert="$(print -n $RESET)" \
         "$@" \
       | sed 's/^\(@@\( [+-][[:digit:]]*,[[:digit:]]*\)\{2\} @@\)$/;5;6m\10m/g'
     elif (( $+commands[git] )); then
