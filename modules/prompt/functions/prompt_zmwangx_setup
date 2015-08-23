@@ -15,21 +15,18 @@
 #
 # #############################################################################
 #
-# There are three zstyles you can set to customize the behavior of this theme,
+# There are two zstyles you can set to customize the behavior of this theme,
 # all under ':prezto:module:prompt:zmwangx:git':
 #
 # * autofetch:       Boolean (yes or no); whether to perform fetch from
 #                    upstream automatically when calculating relative position
 #                    with upstream. Default is 'yes'.
 #
-# * delay:           Floating point number; delay in seconds for dirty check in
-#                    big repos (git status takes >5 seconds). Default is 300.
-#
 # * untracked_dirty: Boolean (yes or no); whether to check for untracked files.
 #                    Default is 'yes'. 'no' is only really useful in huge
 #                    repos.
 #
-# There is a style for debugging, 'debug' under
+# There is also a style specifically for debugging: 'debug' under
 # ':prezto:module:prompt:zmwangx', which adds a ticker (updated every second)
 # and additional debugging info to the preprompt. Credit to @mafredri for the
 # idea of a ticker; this is pure genius!
@@ -230,16 +227,10 @@ prompt_zmwangx_preprompt_render() {
     # check that no command is currently running, the prompt will otherwise be rendered in the wrong place
     [[ -n ${prompt_zmwangx_cmd_timestamp+x} && $1 != 'precmd' ]] && return
 
-    # set style for git branch/position/commit; dim if dirty check has been delayed
-    local branch_color
-    if [[ -z ${prompt_zmwangx_git_last_dirty_check_timestamp+x} ]]; then
-        branch_color='green'
-    else
-        branch_color='242'
-    fi
-    zstyle ':prezto:module:git:info:branch' format "%F{$branch_color}%b%f"
-    zstyle ':prezto:module:git:info:position' format "%F{$branch_color}%p%f"
-    zstyle ':prezto:module:git:info:commit' format "%F{$branch_color}%.7c%f"
+    # set style for git branch/position/commit
+    zstyle ':prezto:module:git:info:branch' format "%F{green}%b%f"
+    zstyle ':prezto:module:git:info:position' format "%F{green}%p%f"
+    zstyle ':prezto:module:git:info:commit' format "%F{green}%.7c%f"
 
     # other basic git styles
     zstyle ':prezto:module:git:info:action' format '%F{242}|%f%F{yellow}%s%f'
@@ -332,7 +323,6 @@ prompt_zmwangx_async_tasks() {
 
         # reset git preprompt variables, switching working tree
         unset prompt_zmwangx_git_dirty
-        unset prompt_zmwangx_git_last_dirty_check_timestamp
 
         # set the new working tree and prefix with "x" to prevent the creation of a named path by AUTO_NAME_DIRS
         prompt_zmwangx_current_working_tree="x${working_tree}"
@@ -354,16 +344,10 @@ prompt_zmwangx_async_tasks() {
         async_job 'prompt_zmwangx' prompt_zmwangx_async_git_fetch $working_tree
     fi
 
-    # if dirty checking is sufficiently fast, tell worker to check it again, or wait for timeout
-    local time_since_last_dirty_check=$(( EPOCHSECONDS - ${prompt_zmwangx_git_last_dirty_check_timestamp:-0} ))
-    local dirty_check_delay_window
-    zstyle -s ':prezto:module:prompt:zmwangx:git' delay dirty_check_delay_window || dirty_check_delay_window=300
-    if (( time_since_last_dirty_check > dirty_check_delay_window )); then
-        unset prompt_zmwangx_git_last_dirty_check_timestamp
-        local untracked_dirty
-        zstyle -b ':prezto:module:prompt:zmwangx:git' untracked_dirty untracked_dirty || untracked_dirty=yes
-        async_job 'prompt_zmwangx' prompt_zmwangx_async_git_dirty $untracked_dirty $working_tree
-    fi
+    # tell worker to check if working copy is dirty
+    local untracked_dirty
+    zstyle -b ':prezto:module:prompt:zmwangx:git' untracked_dirty untracked_dirty || untracked_dirty=yes
+    async_job 'prompt_zmwangx' prompt_zmwangx_async_git_dirty $untracked_dirty $working_tree
 }
 
 prompt_zmwangx_async_callback() {
@@ -377,11 +361,6 @@ prompt_zmwangx_async_callback() {
         prompt_zmwangx_async_git_dirty)
             prompt_zmwangx_git_dirty=$output
             prompt_zmwangx_preprompt_render
-
-            # when prompt_zmwangx_git_last_dirty_check_timestamp is set, the
-            # git info is displayed in a different color, this is why the
-            # prompt is rendered before the variable is (potentially) set
-            (( exec_time > 5 )) && prompt_zmwangx_git_last_dirty_check_timestamp=$EPOCHSECONDS
             ;;
         prompt_zmwangx_async_git_fetch)
             prompt_zmwangx_preprompt_render
