@@ -6,8 +6,14 @@ unsetopt path_dirs
 export PROMPT_EOL_MARK="" # PROMPT_SP
 export LISTMAX=0 # ask if completion listing can't fit in one screen
 
-# turn off bracketed paste, which screws up auto-quoting of URL characters and messes up the Emacs shell
-unset zle_bracketed_paste
+# turn off ZLE bracketed paste in dumb term
+# otherwise turn on ZLE bracketed-paste-magic
+if [[ $TERM == dumb ]]; then
+    unset zle_bracketed_paste
+else
+    autoload -Uz bracketed-paste-magic
+    zle -N bracketed-paste bracketed-paste-magic
+fi
 
 # disable scrolling in completion listings
 # see list-prompt in Completion-System.html, and zsh/complist in Zsh-Modules.html
