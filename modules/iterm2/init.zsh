@@ -12,6 +12,8 @@
 #   Zhiming Wang <zmwangx@gmail.com>
 #
 
+[[ $TERM == dumb ]] && return 1
+
 if [[ -o login ]]; then
   if [ x"$TERM" != "xscreen" ]; then
     # Indicates start of command output. Runs just before command executes.
