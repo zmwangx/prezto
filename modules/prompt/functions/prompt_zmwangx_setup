@@ -107,6 +107,10 @@ prompt_zmwangx_preexec() {
     # refresh the preprompt one last time, primarily for the timestamp
     prompt_zmwangx_preprompt_render 'preexec'
 
+    # flush async jobs if user is trying to fetch or pull in the git repo
+    # (to prevent async fetch locking the repo)
+    [[ $2 =~ git\ .*(pull|fetch) ]] && async_flush_jobs 'prompt_zmwangx'
+
     prompt_zmwangx_cmd_timestamp=$EPOCHSECONDS
 }
 
