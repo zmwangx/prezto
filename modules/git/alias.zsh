@@ -80,6 +80,7 @@ alias gfc='git clone'
 alias gfm='git pull'
 alias gfM='git pull && git submodule update --init --recursive'
 alias gfr='git pull --rebase'
+alias gfp='git fetch --prune'
 
 # Grep (g)
 alias gg='git grep'
@@ -118,7 +119,6 @@ alias gmt='git mergetool'
 
 # Push (p)
 alias gp='git push'
-alias gpf='git push --force'
 alias gpa='git push --all'
 alias gpA='git push --all && git push --tags'
 alias gpt='git push --tags'
