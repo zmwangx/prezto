@@ -1,4 +1,3 @@
-setopt clobber
 setopt interactive_comments
 unsetopt bang_hist
 unsetopt path_dirs
