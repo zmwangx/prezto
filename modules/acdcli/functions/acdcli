@@ -1,0 +1,43 @@
+#
+# Shell wrapper for acd_cli to support external commands of the form acdcli-*.
+#
+# Authors:
+#   Zhiming Wang <zmwangx@gmail.com>
+#
+
+setopt localoptions noshwordsplit noksharrays
+local internal_commands original_args processed_args
+
+internal_commands=(
+    version v sync s old-sync clear-cache cc tree t children ls dir find f
+    find-md5 fh find-regex fr upload ul overwrite ov stream st download dl
+    cat create c mkdir list-trash lt trash rm restore re move mv rename rn
+    resolve rs add-child ac remove-child rc usage u quota q metadata m
+    mount umount delete-everything init i dumpsql test
+)
+original_args=($@)
+processed_args=()
+
+while :; do
+    case $1 in
+        -h|--help|-v|--verbose|-d|--debug|-nl|--no-log|-u|--utf|-c=*|--color=*|-i=*|--check=*)
+            processed_args+=$1 && shift;;
+        -c|--color|-i|--check)
+            processed_args+=($1 $2) && shift && shift;;
+        *)
+            break;;
+    esac
+done
+
+if [[ ${internal_commands[(i)$1]} -le ${#internal_commands} ]]; then
+    # $1 is an internal command
+    command acdcli $original_args
+else
+    # treat as external command
+    command=$1 && shift
+    acdcli-$command $processed_args $@
+fi
+
+# Local Variables:
+# mode: sh
+# End:

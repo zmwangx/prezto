@@ -1,0 +1,266 @@
+#compdef acdcli acd_cli acd_cli.py
+#
+# Completion defintion for acd_cli.
+#
+# This completer calls acd_cli to complete remote nodes when appropriate, but
+# depending on the situation it may take a long time to hear back from
+# acd_cli. Therefore, if the timeout command is detected, then a timeout is
+# applied to each external call, which kills the call if it does not return
+# control in time. The default timeout is 10 seconds (so that users not aware
+# of the timeout wouldn't be caught in surprise too often, and wouldn't need to
+# sit and wait for too long either), and it can be customized via
+#
+#     zstyle ':completion:acd_cli' extern_cmd_timeout <number-of-seconds>
+#
+# <number-of-seconds> is must be a nonnegative integer or floating point
+# number, or it is ignored. Setting the timeout to 0 disables timeout entirely.
+#
+# Authors:
+#   Zhiming Wang <zmwangx@gmail.com>
+#
+
+setopt localoptions noshwordsplit noksharrays
+local extern_cmd_timeout timeout_cmd_args # for __acdcli_retrieve_timeout
+
+local context state state_descr line global_options
+typeset -A opt_args
+
+global_options=(
+    '(-h --help * : -)'{-h,--help}'[show help message and exit]'
+    '(-v -vv --verbose)'{-v,-vv,--verbose}'[print some info messages to stderr; use "-vv" to also get sqlalchemy info]'
+    '(-d -dd --debug)'{-d,-dd,--debug}'[print info and debug to stderr; use "-dd" to also get sqlalchemy debug messages]'
+    '(-nl --no-log)'{-nl,--no-log}'[do not save a log of debug messages]'
+    '(-c --color)'{-c+,--color=}'[select color mode]:color mode:((always\:"turns coloring on" never\:"turns coloring off [default]" auto\:"colors listings when stdout is a tty"))'
+    '(-i --check)'{-i+,--check=}'[select database integrity check type]:database integrity check type:(quick full none)'
+    '(-u --utf)'{-u,--utf}'[force utf output]'
+)
+
+# No option stacking here due to ambiguity.
+_arguments -S "$global_options[@]" '*:: :->actions' && return 0
+
+# The actions array include all documented actions.
+# Undocumented actions such as delete-everything, init, i, dumpsql, and test are not completed.
+local actions
+actions=(
+    {version,v}':print version and exit'
+    {sync,s}':[+] refresh node list cache; fetches complete node listif cache is empty or incremental changes if cache is non-empty'
+    {clear-cache,cc}':delete node cache file [offline operation]'
+    {tree,t}':[+] print directory tree [offline operation]'
+    {children,ls,dir}':[+] list folder'\''s children [offline operation]'
+    {find,f}':find nodes by name [offline operation] [case insensitive]'
+    {find-md5,fh}':find files by MD5 hash [offline operation]'
+    {find-regex,fr}':find nodes by regular expression [offline operation] [case insensitive]'
+    {upload,ul}':[+] upload file and/or directory to a remote destination'
+    {overwrite,ov}':overwrite file A [remote] with content of file B [local]'
+    {stream,st}':[+] upload the standard input stream to a file'
+    {download,dl}':download a remote folder or file; will skip existing local files'
+    cat':output a file to the standard output stream'
+    {create,c,mkdir}':create folder using an absolute path'
+    {list-trash,lt}':[+] list trashed nodes [offline operation]'
+    {trash,rm}':move node to trash'
+    {restore,re}':restore node from trash'
+    {move,mv}':move node A into folder B'
+    {rename,rn}':rename a node'
+    {resolve,rs}':resolve a path to a node ID [offline operation]'
+    {add-child,ac}':add a node to a parent folder'
+    {remove-child,rc}':remove a node from a parent folder'
+    {usage,u}':show drive usage data'
+    {quota,q}':show drive quota [raw JSON]'
+    {metadata,m}':print a node'\''s metadata [raw JSON]'
+    mount':[+] mount the cloud drive at a local directory'
+    umount':[+] unmount cloud drive(s)'
+)
+
+# Add external functions/commands of the form acdcli-*.
+local external_action
+for external_action in ${${(kM)functions:#acdcli-*}#acdcli-} ${${(kM)commands:#acdcli-*}#acdcli-}; do
+    actions+="${external_action}:external command acdcli-${external_action}"
+done
+
+if (( CURRENT == 1 )); then
+    _describe -V -t commands 'action' actions # -V to retain order
+    return
+fi
+
+local args
+args=( '(-h --help * : -)'{-h,--help}'[show help message and exit]' ) # -h, --help are always present
+case "$words[1]" in
+    version|v|clear-cache|cc|usage|u)
+        _arguments -S -s "$args[@]"
+        ;;
+    sync|s)
+        args+=(
+            '(-f --full)'{-f,--full}'[perform a full sync even if the node list is not empty]'
+        )
+        _arguments -S -s "$args[@]"
+        ;;
+    tree|t)
+        args+=(
+            '(-t --include-trash)'{-t,--include-trash}
+            '::root folder for the tree:__acdcli_dirs'
+        )
+        _arguments -S -s "$args[@]"
+        ;;
+    children|ls|dir)
+        args+=(
+            '(-l --long)'{-l,--long}'[long listing format]'
+            '(-b --size-bytes)'{-b,--size-bytes}'[file sizes in bytes]'
+            '(-t --include-trash)'{-t,--include-trash}
+            '(-r --recursive)'{-r,--recursive}
+            '::folder to display contents of:__acdcli_dirs'
+        )
+        _arguments -S -s "$args[@]"
+        ;;
+    find|f)
+        args+=':name'
+        _arguments -S -s "$args[@]"
+        ;;
+    find-md5|fh)
+        args+=':md5:'
+        _arguments -S -s "$args[@]"
+        ;;
+    find-regex|fr)
+        args+=':regex:'
+        _arguments -S -s "$args[@]"
+        ;;
+    upload|ul)
+        # For this action, we disable option stacking and -fooarg due to ambiguity.
+        # Also note that -xe, -xr, -xp and equivalents can be repeated on the command line.
+        args+=(
+            '(-x --max-connections)'{-x,--max-connections=}'[set the maximum concurrent connections \[default: 1, maximum: 8\]]:# concurrent connections:(1 2 3 4 5 6 7 8)'
+            '(-r --max-retries)'{-r,--max-retries=}'[set the maximum number of retries \[default: 0, maximum: 4\]]:# retries:(0 1 2 3 4)'
+            '*'{-xe,--exclude-ending=}'[exclude files whose endings match the given string, e.g., "bak" \[case insensitive\]]:ending:'
+            '*'{-xr,--exclude-regex=}'[exclude files whose names match the given regular expression, e.g. "^thumbs\.db$" \[case insensitive\]]:regex:'
+            '*'{-xp,--exclude-path=}'[exclude file or directory that match the given string]:path:_files'
+            '(-o --overwrite)'{-o,--overwrite}'[overwrite if local modification time is higher or local ctime is higher than remote modification time and local/remote file sizes do not match.]'
+            '(-f --force)'{-f,--force}'[force overwrite]'
+            '(-d --deduplicate)'{-d,--deduplicate}'[exclude duplicate files from upload]'
+            '(-rsf --remove-source-files)'{-rsf,--remove-source-files}'[remove local files on successful upload]'
+            ':local path:_files'
+            # Since we cannot decide whether each of the rest of the arguments
+            # is local or remote (the last argument is remote, but you never
+            # know which one is the last until accept-line), we offer
+            # suggestions for both.
+            '*: : _alternative "remotes:remote parent folder:__acdcli_dirs" "locals:local path:_files"'
+        )
+        _arguments -S "$args[@]"
+        ;;
+    overwrite|ov)
+        args+=(
+            '(-r --max-retries)'{-r,--max-retries=}'[set the maximum number of retries \[default: 0, maximum: 4\]]:# retries:(0 1 2 3 4)'
+            ':remote node:__acdcli_nodes'
+            ':local file:_files'
+        )
+        _arguments -S -s "$args[@]"
+        ;;
+    stream|st)
+        args+=(
+            '(-o --overwrite)'{-o,--overwrite}
+            '(-d --deduplicate)'{-d,--deduplicate}'[prevent duplicates from getting stored after upload]'
+            ': :_guard "^-*" "remote file name"'
+            ':remote parent folder:__acdcli_dirs'
+        )
+        _arguments -S -s "$args[@]"
+        ;;
+    download|dl)
+        # Similar to upload/ul, we disable option stacking and -fooarg here.
+        args+=(
+            '(-x --max-connections)'{-x,--max-connections=}'[set the maximum concurrent connections \[default: 1, maximum: 8\]]:# concurrent connections:(1 2 3 4 5 6 7 8)'
+            '(-r --max-retries)'{-r,--max-retries=}'[set the maximum number of retries \[default: 0, maximum: 4\]]:# retries:(0 1 2 3 4)'
+            '*'{-xe,--exclude-ending=}'[exclude files whose endings match the given string, e.g., "bak" \[case insensitive\]]:ending:'
+            '*'{-xr,--exclude-regex=}'[exclude files whose names match the given regular expression, e.g. "^thumbs\.db$" \[case insensitive\]]:regex:'
+            '(-t --time)'{-t,--time=}'[preserve modification times]'
+            ':remote node:__acdcli_nodes'
+            '::local download directory:_files -/'
+        )
+        _arguments -S "$args[@]"
+        ;;
+    cat)
+        args+=':node:__acdcli_nodes'
+        _arguments -S -s "$args[@]"
+        ;;
+    create|c|mkdir)
+        args+=(
+            '(-p --parents)'{-p,--parents}'[create parent folders as needed]'
+            ':remote folder path:__acdcli_dirs'
+        )
+        _arguments -S -s "$args[@]"
+        ;;
+    list-trash|lt)
+        args+=(
+            '(-r --recursive)'{-r,--recursive}
+        )
+        _arguments -S -s "$args[@]"
+        ;;
+    trash|rm)
+        args+=':node:__acdcli_dirs'
+        _arguments -S -s "$args[@]"
+        ;;
+    restore|re)
+        args+=':node ID:__acdcli_trashes'
+        _arguments -S -s "$args[@]"
+        ;;
+    move|mv)
+        args+=(
+            ':child:__acdcli_nodes'
+            ':new parent:__acdcli_dirs'
+        )
+        _arguments -S -s "$args[@]"
+        ;;
+    rename|rn)
+        args+=(
+            ':node:__acdcli_nodes'
+            ':name:'
+        )
+        _arguments -S -s "$args[@]"
+        ;;
+    resolve|rs)
+        args+=':path:__acdcli_nodes'
+        _arguments -S -s "$args[@]"
+        ;;
+    add-child|ac|remove-child|rc)
+        args+=(
+            ':parent node:__acdcli_dirs'
+            ':child node:__acdcli_nodes'
+        )
+        _arguments -S -s "$args[@]"
+        ;;
+    metadata|m)
+        args+=':node:__acdcli_nodes'
+        _arguments -S -s "$args[@]"
+        ;;
+    mount)
+        # Disable option stacking.
+        args+=(
+            '(-ro --ro)'{-ro,--ro}'[mount read-only]'
+            '(-fg --foreground)'{-fg,--foreground}'[do not detach]'
+            '(-st --single-threaded)'{-st,--single-threaded}
+            '(-ne --nonempty)'{-ne,--nonempty}'[allow mounting over a non-empty directory]'
+            '(-ar --allow-root)'{-ar,--allow-root}'[allow access to root user]'
+            '(-ao --allow-other)'{-ao,--allow-other}'[allow access to other users]'
+            '--modules=[add iconv or subdir modules]:module:(iconv subdir)'
+            '(-n --nlinks)'{-n,--nlinks}'[calculate nlinks]'
+            '(-i --interval)'{-i+,--interval=}'[sync every x seconds \[default: 60, off: 0\]]:seconds'
+            ':mount path:_files -/'
+        )
+        _arguments -S "$args[@]"
+        ;;
+    umount)
+        args+=(
+            '(-l -z --lazy)'{-l,-z,--lazy}
+            '::local path to unmount:_files -/'
+        )
+        _arguments -S -s "$args[@]"
+        ;;
+    *)
+        # Unknown action. If a function _acdcli_action exists, call the
+        # function for completion; otherwise, just complete to local paths.
+        if (( $+functions[_acdcli_$words[1]] )); then
+            local ret
+            _call_function ret _acdcli_$words[1]
+            return $ret
+        else
+            _arguments -S '*:: :_files'
+        fi
+        ;;
+esac

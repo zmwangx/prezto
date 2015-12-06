@@ -1,0 +1,2 @@
+#autoload
+_arguments '*:remote directory:__acdcli_dirs'

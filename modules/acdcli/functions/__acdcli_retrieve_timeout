@@ -1,0 +1,40 @@
+#autoload
+#
+# Helper function for _acdcli.
+#
+# This function assumes two variables in the outer scope:
+#
+# * extern_cmd_timeout
+# * timeout_cmd_args
+#
+# Callers should make sure to declare these local variables first to avoid
+# polluting the global namespace.
+#
+# In this function, the zstyle extern_cmd_timeout in :completion:acdcli is
+# retrieved (if not already initialized), then depending on whether the timeout
+# command is available, the array timeout_cmd_args is either set to empty or of
+# the form (timeout $extern_cmd_timeout). This array can be safely dropped in
+# front of any external command calls.
+#
+# Authors:
+#   Zhiming Wang <zmwangx@gmail.com>
+#
+
+[[ -n $extern_cmd_timeout ]] && return # already initialized
+
+zmodload zsh/zutil
+zstyle -s ':completion:acd_cli' extern_cmd_timeout extern_cmd_timeout
+
+# Discard if not a valid nonnegative floating point number.
+[[ $extern_cmd_timeout == (<->|.<->|<->.<->) ]] || extern_cmd_timeout=
+
+# Use default if not set, which is 10 seconds.
+extern_cmd_timeout=${extern_cmd_timeout:-10}
+
+# If 0 or if timeout command is not available, do not timeout; otherwise,
+# set $timeout_cmd_args.
+if (( extern_cmd_timeout == 0 || ! $+commands[timeout] )) ; then
+    timeout_cmd_args=()
+else
+    timeout_cmd_args=(timeout $extern_cmd_timeout)
+fi

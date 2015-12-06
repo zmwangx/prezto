@@ -1,0 +1,11 @@
+#autoload
+#
+# Helper function for _acdcli.
+#
+# Wrapper around __acdcli_nodes; only completes to directories.
+#
+# Authors:
+#   Zhiming Wang <zmwangx@gmail.com>
+#
+
+__acdcli_nodes --acd-dironly "$@"

@@ -1,0 +1,46 @@
+#
+# Open ACD folders in browser.
+#
+# On OS X, use /usr/bin/open; on other systems, use xdg-open if available, or
+# print the URL to stdout.
+#
+# Authors:
+#   Zhiming Wang <zmwangx@gmail.com>
+#
+
+local verbose remote_path metadata kind id url errored
+[[ $1 == (-v|--verbose) ]] && verbose=--verbose && shift
+[[ $1 == -- ]] && shift
+for remote_path; do
+    [[ $remote_path == /* ]] || {
+        print -PR "%F{red}Error: Remote path '$remote_path' is not absolute.%f" >&2
+        errored=1 && continue
+    }
+    metadata="$(command acdcli $verbose metadata -- "$remote_path")" || {
+        print -PR "%F{red}Error: Failed to extract metadata of '$remote_path'.%f" >&2
+        errored=1 && continue
+    }
+    kind="$(printf '%s' "$metadata" | jq -r '.kind')"
+    [[ $kind == FOLDER ]] || {
+        print -PR "%F{red}Error: '$remote_path' is not a folder. Metadata:%f" >&2
+        print -R "$metadata" >&2
+        errored=1 && continue
+    }
+    id="$(print -R "$metadata" | jq -r '.id')"
+    url="https://www.amazon.com/clouddrive/folder/$id"
+    case $OSTYPE in
+        darwin*)
+            open "$url";;
+        *)
+            if (( $+commands[xdg-open] )); then
+                xdg-open "$url"
+            else
+                print -R "$url"
+            fi
+            ;;
+    esac
+done
+
+# Local Variables:
+# mode: sh
+# End:

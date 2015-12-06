@@ -1,0 +1,61 @@
+#autoload
+#
+# Helper function for _acdcli.
+#
+# Completes to remote paths (absolute only) on ACD. If the first argument is
+# --acdcli-dironly, then completes only to directories. Nodes in Trash are not
+# included; use __acdcli_trashes instead.
+#
+# As it currently stands this completor is not robust enough to handle paths
+# with weird whitespace or quoting; nor can it do parameter expansion and such
+# like _path_files. See comments for details.
+#
+# Authors:
+#   Zhiming Wang <zmwangx@gmail.com>
+#
+
+local dironly current_word nodes
+
+[[ $1 == --acdcli-dironly ]] && { dironly=true; shift; }
+
+current_word=$words[CURRENT]
+
+# Since $current_word is the current word in the ZLE buffer, verbatim, it could
+# contain anything... And even eval won't help (of course we shouldn't anyway),
+# because you can't reliably eval something incomplete. A full treatment might
+# require something similar to what's done in _files (if you know enough
+# zsh...). But at the moment let's just strip all quoting. Absolutely
+# unreliable, but hopefully cater to more real world scenarios than doing
+# nothing.
+current_word=${current_word//[\\\"\']/}
+
+# If nothing have been typed, assume root.
+[[ -n $current_word ]] || current_word='/'
+# Path must be absolute, or error out.
+[[ $current_word == /* ]] || return 1
+# Get dirname, which will be our basis of completion.
+current_directory=${current_word%/*}/
+
+__acdcli_retrieve_timeout
+
+# Get children of the current directory (directories only if dironly is set)
+# and save to the array nodes.
+#
+# For convenience, here is how the output of `acd_cli ls` looks like:
+#
+# [qvIuaiiiRgCHwWnZNm70zw] [A] 2009-avatar-itunes-extras.ite/
+# [ZfVy_iIURn2cln2Frwf0PA] [A] 2009-avatar.m4v
+#
+# Note that directories end in a /, which we'll utilize to filter out regular
+# files.
+if [[ -n $dironly ]]; then
+    nodes=( "${(@f)$(command $timeout_cmd_args[@] acd_cli ls $current_directory 2>/dev/null | sed -e '/[^/]$/d' -e 's/^[^ ]* [^ ]* //')}" )
+else
+    nodes=( "${(@f)$(command $timeout_cmd_args[@] acd_cli ls $current_directory 2>/dev/null | sed -e 's/^[^ ]* [^ ]* //')}" )
+fi
+
+# Prepend current directory to each filename to convert to absolute paths
+# suitable for command line insertion.
+nodes=( $current_directory${^nodes} )
+
+compadd $@ -S '' -- $nodes
