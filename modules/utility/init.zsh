@@ -65,7 +65,7 @@ alias type='type -a'
 # ls
 if is-callable 'dircolors'; then
   # GNU Core Utilities
-  alias ls='ls --group-directories-first'
+  alias ls='ls --group-directories-first -v'
 
   if zstyle -t ':prezto:module:utility:ls' color; then
     if [[ -s "${XDG_CONFIG_HOME:-$HOME/.config}/dircolors/dir_colors" ]]; then
@@ -76,9 +76,9 @@ if is-callable 'dircolors'; then
       eval "$(dircolors --sh)"
     fi
 
-    alias ls="${aliases[ls]:-ls} --color=auto"
+    alias ls="${aliases[ls]:-ls} --color=auto -v"
   else
-    alias ls="${aliases[ls]:-ls} -F"
+    alias ls="${aliases[ls]:-ls} -F -v"
   fi
 else
   # BSD Core Utilities
