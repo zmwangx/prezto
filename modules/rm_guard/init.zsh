@@ -21,7 +21,7 @@ rm () {
     for node; do
         # -f, --force hasn't been specified && node is a git repo
         [[ -z $force && -e $node/.git ]] && {
-            printf "\e[31m'%s' is a git repo -- won't remove without the -f or --force option" $node
+            printf "\e[31m'%s' is a git repo -- won't remove without the -f or --force option\e[0m\n" $node
             return 1
         }
     done
