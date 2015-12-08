@@ -8,4 +8,4 @@
 #   Zhiming Wang <zmwangx@gmail.com>
 #
 
-__acdcli_nodes --acd-dironly "$@"
+__acdcli_nodes --acdcli-dironly "$@"
