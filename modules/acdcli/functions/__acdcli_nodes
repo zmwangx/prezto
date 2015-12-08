@@ -49,13 +49,9 @@ __acdcli_retrieve_timeout
 # Note that directories end in a /, which we'll utilize to filter out regular
 # files.
 if [[ -n $dironly ]]; then
-    nodes=( "${(@f)$(command $timeout_cmd_args[@] acd_cli ls $current_directory 2>/dev/null | sed -e '/[^/]$/d' -e 's/^[^ ]* [^ ]* //')}" )
+    nodes=( "${(@f)$(command $timeout_cmd_args[@] acd_cli --check=none ls $current_directory 2>/dev/null | sed -e '/[^/]$/d' -e 's/^[^ ]* [^ ]* //')}" )
 else
-    nodes=( "${(@f)$(command $timeout_cmd_args[@] acd_cli ls $current_directory 2>/dev/null | sed -e 's/^[^ ]* [^ ]* //')}" )
+    nodes=( "${(@f)$(command $timeout_cmd_args[@] acd_cli --check=none ls $current_directory 2>/dev/null | sed -e 's/^[^ ]* [^ ]* //')}" )
 fi
 
-# Prepend current directory to each filename to convert to absolute paths
-# suitable for command line insertion.
-nodes=( $current_directory${^nodes} )
-
-compadd $@ -S '' -- $nodes
+compadd -S '' -p $current_directory $@ -- $nodes

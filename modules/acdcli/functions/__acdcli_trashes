@@ -11,7 +11,7 @@
 local nodes # array with element of the form node_id:node_path suitable for _describe
 __acdcli_retrieve_timeout
 nodes=()
-command $timeout_cmd_args[@] acd_cli list-trash 2>/dev/null | \
+command $timeout_cmd_args[@] acd_cli --check=none list-trash 2>/dev/null | \
     while IFS= read -r line; do
         # line looks like: [17Be8nxHT9-dT0CxfjnQJQ] [T] Documents/
         node_id=${${line[(ws: :)1]}//[\[\]]/}
