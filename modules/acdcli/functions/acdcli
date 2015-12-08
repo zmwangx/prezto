@@ -20,7 +20,9 @@ processed_args=()
 
 while :; do
     case $1 in
-        -h|--help|-v|--verbose|-d|--debug|-nl|--no-log|-u|--utf|-c=*|--color=*|-i=*|--check=*)
+        -h|--help)
+            command acdcli --help; return $?;;
+        -v|--verbose|-d|--debug|-nl|--no-log|-u|--utf|-c=*|--color=*|-i=*|--check=*)
             processed_args+=$1 && shift;;
         -c|--color|-i|--check)
             processed_args+=($1 $2) && shift && shift;;
@@ -28,6 +30,8 @@ while :; do
             break;;
     esac
 done
+
+[[ -n $1 ]] || { print -P '%F{red}Error: No action given.%f'; return 1; }
 
 if [[ ${internal_commands[(i)$1]} -le ${#internal_commands} ]]; then
     # $1 is an internal command
