@@ -1,0 +1,7 @@
+#autoload
+_arguments -S -s \
+           '-h[show help message and exit]' \
+           '-t[test run, show what would be done]' \
+           '-v[run all acd_cli invocations verbosely]' \
+           ': :_guard "^-*" "perl statement(s)"' \
+           '*:remote directory:__acdcli_dirs'

@@ -15,6 +15,7 @@ Define shell extension mechanism and completions for
 ## Actions
 
 * `open`: open remote directories in the web interface.
+* `acdcli-batch-rename`: batch rename remote files.
 
 ## DIY
 

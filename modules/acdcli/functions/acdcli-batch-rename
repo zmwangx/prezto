@@ -1,0 +1,85 @@
+#
+# Batch rename files on ACD.
+#
+# Authors:
+#   Zhiming Wang <zmwangx@gmail.com>
+#
+
+setopt localoptions noshwordsplit noksharrays
+
+help_text="Usage: ${0##*/} [options] perlstmts dir [dir ...]
+
+<perlstmts> is one or more Perl statements modifying the basename of a path on
+ACD, stored in $_. A counter $n (beginning from 1) is also available inside the
+statements. <dir> is the path to the ACD directory whose children are to be
+renamed. Multiple dirs are allowed on the command line, and the counter is
+reset for each dir.
+
+Notes:
+    1. The counter $n is set to the appropriate value for each child (in
+       alphabetical order), so changes to $n do not persist.
+    2. Only basenames are ever touched; e.g., 's/foo/bar/g' would rename
+       /foo/foo to /foo/bar, not /bar/bar.
+
+Options:
+    -h  Print this help and exit with 1.
+    -t  Test run; show what would be renamed, but do not actually carry out the
+        operations.
+    -v  Run all acd_cli invocations verbosely.
+"
+local opt OPTIND OPTARG
+local test verbose
+while getopts ":htv" opt; do
+    case $opt in
+        h)
+            printf '%s\n' $help_text >&2
+            return 1
+            ;;
+        t)
+            test=1
+            ;;
+        v)
+            verbose=--verbose
+            ;;
+        \?)
+            printf 'Error: Invalid option -%s.\n\n%s\n' $OPTARG $help_text >&2
+            return 1
+            ;;
+    esac
+done
+shift $((OPTIND-1))
+
+local perlstmts dir counter children child new_name ret=0
+perlstmts=$1 && shift
+for dir; do
+    [[ $dir == */ ]] || dir=$dir/
+    children=( "${(@f)$(setopt pipefail;
+                        command acd_cli $verbose ls $dir | \
+                        sed -e 's/^[^ ]* [^ ]* //')}" ) || {
+        printf "Error: Failed to list '%s'" $dir
+        ret=1
+        continue
+    }
+    counter=0
+    for child in $children; do
+        (( counter++ ))
+        new_name="$(command perl -pe "my \$n = $counter; $perlstmts" <<< $child)" || {
+            printf "Error: Perl failed on name '%s'" $child
+            ret=1
+            continue
+        }
+        [[ $child != $new_name ]] || continue
+        printf "%s => %s\n" $child $new_name
+        (( test )) && continue
+        command acd_cli $verbose rename $dir$child $new_name || {
+            printf "Error: Failed to rename '%s%s' to '%s'" $dir $child $new_name
+            ret=1
+            continue
+        }
+    done
+done
+return $ret
+
+# Local Variables:
+# mode: sh
+# End:
