@@ -253,11 +253,11 @@ case "$words[1]" in
         _arguments -S -s "$args[@]"
         ;;
     *)
-        # Unknown action. If a function _acdcli_action exists, call the
+        # Unknown action. If a function _acdcli-action exists, call the
         # function for completion; otherwise, just complete to local paths.
-        if (( $+functions[_acdcli_$words[1]] )); then
+        if (( $+functions[_acdcli-$words[1]] )); then
             local ret
-            _call_function ret _acdcli_$words[1]
+            _call_function ret _acdcli-$words[1]
             return $ret
         else
             _arguments -S '*:: :_files'

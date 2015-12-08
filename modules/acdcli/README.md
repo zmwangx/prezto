@@ -24,9 +24,9 @@ equivalents. Note that internal actions always take precedence on external
 ones, and among external actions, functions take precedence over commands.
 
 To define completion for an external aciton, use an autoloaded function of the
-form `_acdcli_action` that handles a command line like `action [options]
+form `_acdcli-action` that handles a command line like `action [options]
 [arguments]`. As a very basic example, see
-[`_acdcli_open`](functions/_acdcli_open).
+[`_acdcli-open`](functions/_acdcli-open).
 
 The autoloaded completers [`__acdcli_nodes`](functions/__acdcli_nodes),
 [`__acdcli_dirs`](functions/__acdcli_dirs), and
