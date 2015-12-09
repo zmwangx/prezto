@@ -14,7 +14,7 @@
 #   Zhiming Wang <zmwangx@gmail.com>
 #
 
-local dironly current_word nodes
+local dironly current_word nodes files dirs
 
 [[ $1 == --acdcli-dironly ]] && { dironly=true; shift; }
 
@@ -54,4 +54,14 @@ else
     nodes=( "${(@f)$(command $timeout_cmd_args[@] acd_cli --check=none ls $current_directory 2>/dev/null | sed -e 's/^[^ ]* [^ ]* //')}" )
 fi
 
-compadd -S '' -p $current_directory $@ -- $nodes
+# Separate files and directories.
+files=( ${nodes:#*/} )
+dirs=( ${(M)nodes:#*/} )
+
+# Mimick _path_files behavior: For a directory, show its name with a trailing
+# slash in the completion listing, but don't include the slash in the actual
+# matched word. The trailing slash is inserted into the editing buffer as a
+# suffix, but automatically removed (or rather, "solidified") when one types a
+# slash immediately after.
+compadd -S '/' -q -p $current_directory -d dirs $@ -- ${dirs%/}
+[[ -n $dironly ]] || compadd -S '' -p $current_directory $@ -- $files
