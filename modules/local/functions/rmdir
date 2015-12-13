@@ -1,0 +1,17 @@
+#
+# rmdir wrapper that tries to remove dangling .DS_Store's first.
+#
+# Authors:
+#   Zhiming Wang <zmwangx@gmail.com>
+#
+
+function rmdir
+{
+    local arg
+    for arg; do [[ $arg != -* ]] && rm -f "$arg/.DS_Store"; done
+    command rmdir "$@"
+}
+
+# Local Variables:
+# mode: sh
+# End:
