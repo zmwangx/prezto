@@ -1,0 +1,4 @@
+#compdef pmodload
+local modules
+modules=( "${ZDOTDIR:-$HOME}/.zprezto/modules"/*(/:t) )
+_describe 'module' modules
