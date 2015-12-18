@@ -193,7 +193,7 @@ case "$words[1]" in
         _arguments -S -s "$args[@]"
         ;;
     trash|rm)
-        args+=':node:__acdcli_dirs'
+        args+=':node:__acdcli_nodes'
         _arguments -S -s "$args[@]"
         ;;
     restore|re)
