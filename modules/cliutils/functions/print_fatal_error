@@ -7,7 +7,7 @@
 
 function print_fatal_error
 {
-    echo "${BOLD}${RED}fatal error: $1${RESET}" >&2
+    echo -E "${BOLD}${RED}Fatal error: $1${RESET}" >&2
 }
 
 # Local Variables:
