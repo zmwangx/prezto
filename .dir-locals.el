@@ -13,6 +13,6 @@
                             "# " _ \n
                             "#" \n
                             "# Authors:" \n
-                            "#   " user-full-name "<" user-mail-address ">" \n
+                            "#   " user-full-name " <" user-mail-address ">" \n
                             "#" \n
                             \n))))))
