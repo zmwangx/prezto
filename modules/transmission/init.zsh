@@ -23,30 +23,38 @@ tmsa () {
     return $ret
 }
 
-# Technical note: All of the following functions except tmse that make use of
-# the --torrent option could get away with a single transmission-remote call by
-# passing a comma-delimited list of torrent IDs to --torrent, but we use
-# multiple calls for better separation of output and errors.
+# This helper scans argv for non-numeric arguments (more precisely, non-
+# nonnegative integer arguments) and print an error for those
+# arguments. Afterwards it set the array argument `torrents' to the list of
+# (potentially) valid torrent IDs.
+#
+# Note that the caller is required to declare local arguments `torrents' and
+# `ret', where `torrents' is an array and `ret' is a scalar for return value.
+__tms_filter_torrent_ids () {
+    local invalid_args
+    invalid_args=( ${@:#<->} )
+    [[ -z $invalid_args ]] || {
+        print_error "The following arguments are not numeric torrent IDs: ${(j:, :)${(qq)invalid_args[@]}}.";
+        ret=1;
+    }
+    set -A torrents ${(M)@:#<->}
+}
 
 tmsi () {
-    local ret=0
-    for arg; do
-        [[ $arg == <-> ]] || { print_error "'$arg' is not a numeric torrent ID."; ret=1; continue; }
-        print_progress "Retrieving info for torrent $arg..."
-        command transmission-remote --torrent $arg --info \
-            || { print_error "Failed to retrieve info for torrent $arg."; ret=1; }
-    done
+    local ret=0 torrents
+    __tms_filter_torrent_ids $@
+    [[ -n $torrents ]] || { print_error "No torrents specified."; return 1; }
+    print_progress "Retrieving info for torrent(s) ${(j:, :)torrents}..."
+    command transmission-remote --torrent ${(j:,:)torrents} --info
     return $ret
 }
 
 tmsf () {
-    local ret=0
-    for arg; do
-        [[ $arg == <-> ]] || { print_error "'$arg' is not a numeric torrent ID."; ret=1; continue; }
-        print_progress "Retrieving list of files for torrent $arg..."
-        command transmission-remote --torrent $arg --files \
-            || { print_error "Failed to retrieve info for torrent $arg."; ret=1; }
-    done
+    local ret=0 torrents
+    __tms_filter_torrent_ids $@
+    [[ -n $torrents ]] || { print_error "No torrents specified."; return 1; }
+    print_progress "Retrieving list of files for torrent(s) ${(j:, :)torrents}..."
+    command transmission-remote --torrent ${(j:,:)torrents} --files
     return $ret
 }
 
@@ -66,23 +74,19 @@ HELP
 }
 
 tmsv () {
-    local ret=0
-    for arg; do
-        [[ $arg == <-> ]] || { print_error "'$arg' is not a numeric torrent ID."; ret=1; continue; }
-        print_progress "Start verifying torrent $arg..."
-        command transmission-remote --torrent $arg --remove \
-            || { print_error "Failed to start verifying torrent $arg."; ret=1; }
-    done
+    local ret=0 torrents
+    __tms_filter_torrent_ids $@
+    [[ -n $torrents ]] || { print_error "No torrents specified."; return 1; }
+    print_progress "Start verifying torrent(s) ${(j:, :)torrents}..."
+    command transmission-remote --torrent ${(j:,:)torrents} --verify
     return $ret
 }
 
 tmsr () {
-    local ret=0
-    for arg; do
-        [[ $arg == <-> ]] || { print_error "'$arg' is not a numeric torrent ID."; ret=1; continue; }
-        print_progress "Removing torrent $arg..."
-        command transmission-remote --torrent $arg --remove \
-            || { print_error "Failed to remove torrent $arg."; ret=1; }
-    done
+    local ret=0 torrents
+    __tms_filter_torrent_ids $@
+    [[ -n $torrents ]] || { print_error "No torrents specified."; return 1; }
+    print_progress "Removing torrent(s) ${(j:, :)torrents}..."
+    command transmission-remote --torrent ${(j:,:)torrents} --remove
     return $ret
 }
