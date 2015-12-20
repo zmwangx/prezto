@@ -16,6 +16,7 @@ touch $_Z_DATA
 unset _z_data_home
 
 # Set $_Z_NO_RESOLVE_SYMLINKS to prevent symlink resolution.
+_Z_NO_RESOLVE_SYMLINKS=yes
 
 # Set $_Z_NO_PROMPT_COMMAND to handle PROMPT_COMMAND/precmd yourself.
 
