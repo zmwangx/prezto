@@ -7,7 +7,7 @@
 
 function print_error
 {
-    echo -E "${RED}Error: $1${RESET}" >&2
+    echo -E "${RED}Error: $*${RESET}" >&2
 }
 
 # Local Variables:

@@ -7,7 +7,7 @@
 
 function print_warning
 {
-    echo -E "${YELLOW}Warning: $1${RESET}" >&2
+    echo -E "${YELLOW}Warning: $*${RESET}" >&2
 }
 
 # Local Variables:

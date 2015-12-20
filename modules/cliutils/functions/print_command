@@ -7,7 +7,7 @@
 
 function print_command
 {
-    echo -E "${BOLD}${BLUE}$1${RESET}" >&2
+    echo -E "${BOLD}${BLUE}$*${RESET}" >&2
 }
 
 # Local Variables:

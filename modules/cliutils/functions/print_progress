@@ -13,9 +13,10 @@
 function print_progress
 {
     if [[ $1 != "-r" ]]; then
-        echo -E "${GREEN}$1${RESET}" >&2
+        echo -E "${GREEN}$*${RESET}" >&2
     else
-        echo -n -E "$\r{GREEN}$2${RESET}" >&2
+        shift
+        echo -n -E "$\r{GREEN}$*${RESET}" >&2
     fi
 }
 
