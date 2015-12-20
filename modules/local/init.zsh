@@ -9,5 +9,6 @@ source "${0:h}/load.zsh"
 source "${0:h}/options.zsh"
 source "${0:h}/widgets.zsh"
 source "${0:h}/keybindings.zsh"
+source "${0:h}/misc.zsh"
 
 pmodload "cliutils"
