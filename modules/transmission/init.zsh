@@ -40,23 +40,52 @@ __tms_filter_torrent_ids () {
     set -A torrents ${(M)@:#<->}
 }
 
-tmsi () {
-    local ret=0 torrents
+# A central dispatcher to fight code duplication.
+#
+# Arguments are command name (tmsi, tmsf, etc.) plus torrent IDs.
+__tms_central_command () {
+    local command ret=0 torrents
+    command=$1 && shift
     __tms_filter_torrent_ids $@
     [[ -n $torrents ]] || { print_error "No torrents specified."; return 1; }
-    print_progress "Retrieving info for torrent(s) ${(j:, :)torrents}..."
-    command transmission-remote --torrent ${(j:,:)torrents} --info
+
+    local message_opening action_opt
+    case $command in
+        tmsi)
+            message_opening="Retrieving info for"
+            action_opt=--info
+            ;;
+        tmsf)
+            message_opening="Retrieving list of files for"
+            action_opt=--files
+            ;;
+        tmsv)
+            message_opening="Start verifying"
+            action_opt=--verify
+            ;;
+        tmsr)
+            message_opening="Removing"
+            action_opt=--remove
+            ;;
+        *)
+            print_error "Unknown command ${(qq)command}."
+            return 1
+            ;;
+    esac
+
+    print_progress "$message_opening torrent(s) ${(j:, :)torrents}..."
+    command transmission-remote --torrent ${(j:,:)torrents} $action_opt
     return $ret
 }
 
-tmsf () {
-    local ret=0 torrents
-    __tms_filter_torrent_ids $@
-    [[ -n $torrents ]] || { print_error "No torrents specified."; return 1; }
-    print_progress "Retrieving list of files for torrent(s) ${(j:, :)torrents}..."
-    command transmission-remote --torrent ${(j:,:)torrents} --files
-    return $ret
+# Define individual functions realized by __tms_central_command
+function {
+    local command
+    for command in tmsi tmsf tmsv tmsr; do
+        eval "$command () __tms_central_command $command \$@"
+    done
 }
+
 
 # Exclude files from a torrent
 tmse () {
@@ -71,22 +100,4 @@ HELP
     [[ $1 == <-> ]] || { print_error "'$1' is not a numeric torrent ID."; return 1; }
     command transmission-remote --torrent $1 --no-get $2 \
         || { print_error "Failed to exclude files '$2' from torrent $1."; return 1; }
-}
-
-tmsv () {
-    local ret=0 torrents
-    __tms_filter_torrent_ids $@
-    [[ -n $torrents ]] || { print_error "No torrents specified."; return 1; }
-    print_progress "Start verifying torrent(s) ${(j:, :)torrents}..."
-    command transmission-remote --torrent ${(j:,:)torrents} --verify
-    return $ret
-}
-
-tmsr () {
-    local ret=0 torrents
-    __tms_filter_torrent_ids $@
-    [[ -n $torrents ]] || { print_error "No torrents specified."; return 1; }
-    print_progress "Removing torrent(s) ${(j:, :)torrents}..."
-    command transmission-remote --torrent ${(j:,:)torrents} --remove
-    return $ret
 }
