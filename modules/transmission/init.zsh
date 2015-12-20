@@ -29,7 +29,7 @@ tmsa () {
 __tms_central_command () {
     local command torrents
     command=$1 && shift
-    torrents=$@
+    torrents=( $@ )
     [[ -n $torrents ]] || { print_error "No torrents specified."; return 1; }
 
     local message_opening action_opt
@@ -64,7 +64,7 @@ __tms_central_command () {
             ;;
     esac
 
-    print_progress "$message_opening torrent(s) ${(j:, :)torrents}..."
+    print_progress "$message_opening torrent(s) ${(j:, :)${torrents[@]//,/, }}..."
     command transmission-remote --torrent ${(j:,:)torrents} $action_opt
     return $ret
 }
