@@ -11,8 +11,10 @@ Shortcuts for working with `transmission-daemon` and `transmission-remote`.
 * `tmsi id...` for retrieving torrent info;
 * `tmsf id...` for listing torrent files;
 * `tmse id fileno_list` for excluding files from torrent;
+* `tmsp id...` for pausing torrents;
+* `tmsr id...` for resuming torrents;
 * `tmsv id...` for verifying torrents;
-* `tmsr id...` for removing transfers.
+* `tms-remove id...` for removing transfers.
 
 ## Authors
 * [Zhiming Wang](https://github.com/zmwangx)

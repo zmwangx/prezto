@@ -59,11 +59,19 @@ __tms_central_command () {
             message_opening="Retrieving list of files for"
             action_opt=--files
             ;;
+        tmsp)
+            message_opening="Pausing"
+            action_opt=--stop
+            ;;
+        tmsr)
+            message_opening="Resuming"
+            action_opt=--start
+            ;;
         tmsv)
             message_opening="Start verifying"
             action_opt=--verify
             ;;
-        tmsr)
+        tms-remove)
             message_opening="Removing"
             action_opt=--remove
             ;;
@@ -81,7 +89,7 @@ __tms_central_command () {
 # Define individual functions realized by __tms_central_command
 function {
     local command
-    for command in tmsi tmsf tmsv tmsr; do
+    for command in tmsi tmsf tmsp tmsr tmsv tms-remove; do
         eval "$command () __tms_central_command $command \$@"
     done
 }
