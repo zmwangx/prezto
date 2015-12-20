@@ -1,0 +1,42 @@
+#
+# Loop until interrupt.
+#
+# Authors:
+#   Zhiming Wang <zmwangx@gmail.com>
+#
+
+setopt localoptions noshwordsplit noksharrays
+
+trap 'return 0' SIGINT
+
+if [[ $# == 0 || $1 == (-h|--help) ]]; then
+    cat >&2 <<'HELP'
+Usage: loop [interval] command [arg...]
+
+Loop until SIGINT (^C).
+
+Interval (in seconds) must be a nonnegative integer. If no interval is given,
+30 is used. The first argument is taken as an interval if and only if it is a
+nonnegative integer.
+
+command [arg...] is the command to be looped. All such args are passed to
+`eval' in the current shell's context, so you may pass command and args in
+whichever way that `eval' understands.
+
+HELP
+    return 1
+fi
+
+local interval=30
+[[ $1 == <-> ]] && { interval=$1; shift; }
+
+[[ -n $1 ]] || { print_error "No command given."; return 1; }
+
+while :; do
+    eval $@
+    sleep $interval
+done
+
+# Local Variables:
+# mode: sh
+# End:
