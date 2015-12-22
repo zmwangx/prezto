@@ -8,8 +8,8 @@
 pmodload "cliutils"
 
 backblaze-stop () {
-    print_command "sudo launchctl unload /Library/LaunchDaemons/com.backblaze.bzserv.plist"
-    sudo launchctl unload /Library/LaunchDaemons/com.backblaze.bzserv.plist
-    print_command "launchctl unload ~/Library/LaunchAgents/com.backblaze.bzbmenu.plist"
-    launchctl unload ~/Library/LaunchAgents/com.backblaze.bzbmenu.plist
+    print_command "sudo launchctl remove com.backblaze.bzserv"
+    sudo launchctl remove com.backblaze.bzserv
+    print_command "launchctl remove com.backblaze.bzbmenu"
+    launchctl remove com.backblaze.bzbmenu
 }
