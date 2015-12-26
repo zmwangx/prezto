@@ -1,0 +1,38 @@
+#
+# Source this script from the tests directory to see autoenv in action.
+#
+# Authors:
+#   Zhiming Wang <zmwangx@gmail.com>
+#
+
+function {
+    _: () {
+        print ${(l/COLUMNS > 20 ? COLUMNS : 20//=/)} # A row of ='s
+        print -Pn '%F{cyan}PWD: %f'
+        print -R $PWD
+        print -Pn '%F{cyan}PATH: %f'
+        print -R $PATH
+        print -P "%F{blue}==> $@%f"
+        eval $@
+    }
+    zstyle :prezto:module:autoenv debug on
+    _: cd ..
+    _: cd tests
+    _: check_bin
+    _: check_libexec
+    _: cd dir1
+    _: cd subdir1
+    _: check_bin
+    _: check_libexec
+    _: cd ../../dir2
+    _: cd ..
+    _: cd ..
+    _: type check_bin check_libexec
+    zstyle :prezto:module:autoenv debug off
+    cd tests
+    unfunction _:
+}
+
+# Local Variables:
+# mode: sh
+# End:
