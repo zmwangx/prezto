@@ -67,6 +67,9 @@ prompt_zmwangx_setup() {
 
     # let us start on a clean line!
     PROMPT=''
+
+    # don't let virtualenv ruin the clean prompt (in case the python module isn't loaded)
+    VIRTUAL_ENV_DISABLE_PROMPT=1
 }
 
 prompt_zmwangx_precmd() {
