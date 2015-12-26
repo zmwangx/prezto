@@ -24,7 +24,7 @@ _autoenv_source () {
 
     _autoenv_debug_print_stacks () {
         zstyle -t :prezto:module:autoenv debug && {
-            print -P $'%F{blue}\n[DEBUG] Directory stack:%f'
+            print -P '%F{blue}[DEBUG] Directory stack:%f'
             (( _autoenv_stack_counter > 0 )) && print -Rl $_autoenv_dirs
             print -P '%F{blue}[DEBUG] Purge function stack:%f'
             (( _autoenv_stack_counter > 0 )) && print -Rl $_autoenv_purge_funcs
@@ -63,7 +63,7 @@ _autoenv_source () {
     }
 
     # Source .env
-    zstyle -t :prezto:module:autoenv quiet || print -P $'%F{green}\nSourcing .env...%f'
+    zstyle -t :prezto:module:autoenv quiet || print -P '%F{green}Sourcing .env...%f'
     source $PWD/.env || {
         print -P '%F{red}Error: Sourcing .env failed.%f'
         return 1
