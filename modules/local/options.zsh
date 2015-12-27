@@ -1,6 +1,7 @@
 setopt interactive_comments
 setopt numeric_glob_sort
 setopt glob_star_short 2>/dev/null # new in 5.2
+unsetopt auto_name_dirs
 unsetopt bang_hist
 unsetopt path_dirs
 
