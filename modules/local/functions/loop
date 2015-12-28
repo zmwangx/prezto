@@ -11,29 +11,33 @@ trap 'return 0' SIGINT
 
 if [[ $# == 0 || $1 == (-h|--help) ]]; then
     cat >&2 <<'HELP'
-Usage: loop [interval] command [arg...]
+Usage: loop [-e|--eval] [interval] command [arg...]
 
 Loop until SIGINT (^C).
 
 Interval (in seconds) must be a nonnegative integer. If no interval is given,
-30 is used. The first argument is taken as an interval if and only if it is a
-nonnegative integer.
+30 is used. After parsing the optional -e, --eval option, the first remaining
+argument is taken as an interval if and only if it is a nonnegative integer.
 
-command [arg...] is the command to be looped. All such args are passed to
-`eval' in the current shell's context, so you may pass command and args in
-whichever way that `eval' understands.
+command [arg...] is the command to be looped. If the -e, --eval option is
+specified, then all remaining arguments (including `command') are routed
+through `eval', so the command and arguments can be passed in whichever way
+`eval' understands (this is useful for shell syntax like a
+pipeline). Otherwise, command [arg...] is invoked directly.
 
 HELP
     return 1
 fi
 
+local eval=''
+[[ $1 == (-e|--eval) ]] && { eval='eval'; shift; }
 local interval=30
 [[ $1 == <-> ]] && { interval=$1; shift; }
 
 [[ -n $1 ]] || { print_error "No command given."; return 1; }
 
 while :; do
-    eval $@
+    $eval $@  # If -e|--eval is not specified, then $eval is empty and ignored.
     sleep $interval
 done
 
