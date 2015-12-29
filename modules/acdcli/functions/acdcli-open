@@ -8,15 +8,15 @@
 #   Zhiming Wang <zmwangx@gmail.com>
 #
 
-local verbose remote_path metadata kind id url errored
-[[ $1 == (-v|--verbose) ]] && verbose=--verbose && shift
-[[ $1 == -- ]] && shift
+setopt localoptions noksharrays noshwordsplit
+local global_options remote_path metadata kind id url errored
+global_options=( ${(s/:/)ACDCLI_GLOBAL_OPTS} )
 for remote_path; do
     [[ $remote_path == /* ]] || {
         print -PR "%F{red}Error: Remote path '$remote_path' is not absolute.%f" >&2
         errored=1 && continue
     }
-    metadata="$(command acdcli $verbose metadata -- "$remote_path")" || {
+    metadata="$(command acdcli $global_options metadata -- "$remote_path")" || {
         print -PR "%F{red}Error: Failed to extract metadata of '$remote_path'.%f" >&2
         errored=1 && continue
     }

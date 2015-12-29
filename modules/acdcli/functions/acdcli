@@ -37,9 +37,10 @@ if [[ ${internal_commands[(i)$1]} -le ${#internal_commands} ]]; then
     # $1 is an internal command
     command acdcli $original_args
 else
-    # treat as external command
+    # Treat as external command
     command=$1 && shift
-    acdcli-$command $processed_args $@
+    # Pass acdcli global options in a "serialized" (colon-delimited) scalar env var
+    ACDCLI_GLOBAL_OPTS=${(j/:/)processed_args} acdcli-$command $@
 fi
 
 # Local Variables:

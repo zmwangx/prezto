@@ -25,10 +25,10 @@ Options:
     -h  Print this help and exit with 1.
     -t  Test run; show what would be renamed, but do not actually carry out the
         operations.
-    -v  Run all acd_cli invocations verbosely.
 "
 local opt OPTIND OPTARG
-local test verbose
+local test global_options
+global_options=( ${(s/:/)ACDCLI_GLOBAL_OPTS} )
 while getopts ":htv" opt; do
     case $opt in
         h)
@@ -37,9 +37,6 @@ while getopts ":htv" opt; do
             ;;
         t)
             test=1
-            ;;
-        v)
-            verbose=--verbose
             ;;
         \?)
             printf 'Error: Invalid option -%s.\n\n%s\n' $OPTARG $help_text >&2
@@ -54,7 +51,7 @@ perlstmts=$1 && shift
 for dir; do
     [[ $dir == */ ]] || dir=$dir/
     children=( "${(@f)$(setopt pipefail;
-                        command acd_cli $verbose ls $dir | \
+                        command acd_cli $global_options ls $dir | \
                         sed -e 's/^[^ ]* [^ ]* //')}" ) || {
         printf "Error: Failed to list '%s'" $dir
         ret=1
@@ -71,7 +68,7 @@ for dir; do
         [[ $child != $new_name ]] || continue
         printf "%s => %s\n" $child $new_name
         (( test )) && continue
-        command acd_cli $verbose rename $dir$child $new_name || {
+        command acd_cli $global_options rename $dir$child $new_name || {
             printf "Error: Failed to rename '%s%s' to '%s'" $dir $child $new_name
             ret=1
             continue
