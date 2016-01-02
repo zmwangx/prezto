@@ -72,6 +72,10 @@ Functions
   - `python-info` exposes information about the Python environment via the
     `$python_info` associative array.
 
+  - `virtual-install` install a given Python CLI tool to a fresh
+    virtualenv, and link scripts to ~/bin. See `virtual-install -h` for
+    details.
+
 Theming
 -------
 

@@ -1,0 +1,224 @@
+#
+# Install Python CLI tool in a fresh virtualenv, and link to ~/bin.
+#
+# Authors:
+#   Zhiming Wang <zmwangx@gmail.com>
+#
+
+setopt localoptions noshwordsplit noksharrays
+
+pmodload cliutils
+
+readonly HERE=${ZDOTDIR:-$HOME}/.zprezto/modules/python/functions
+
+# Generate Python version suffixes.
+#
+# For instance, for Python 3.5.1, the suffixes would be 3.5.1, 3.5 and 3, one
+# per line. Takes the version number as a positional argument.
+_virtual_install_generate_suffixes () {
+    local version suffixes
+    version=$1
+    suffixes=()
+    # Only accept version numbers like 3, 3.5, 3.5.1
+    [[ $version == <->(|.<->(|.<->)) ]] || return
+    while [[ $version == *.* ]]; do
+        suffixes+=$version
+        version=${version%.*}
+    done
+    suffixes+=$version
+    print -l $suffixes
+}
+
+# Extract name of scripts installed by a Python project.
+#
+# Takes one positional argument: the project root. Extracted names are saved to
+# an array named `scripts'.
+#
+# Prints some user-friendly dignostic info along the way.
+_virtual_install_extract_scripts () {
+    local project_root tmpfile
+    project_root=$1
+    [[ -f $project_root/setup.py ]] || {
+        print_error "${(q-)project_root}/setup.py not found or is not a file."
+        return 1
+    }
+    print_progress "Locating packaged scripts..."
+    # Run setup.py with setuptools.setup spoofed
+    tmpfile=$(mktemp)
+    trap 'rm -f $tmpfile' EXIT
+    PYTHONPATH=$HERE:$PYTHONPATH python $project_root/setup.py >|$tmpfile || {
+        print_error "Failed to run setup.py with spoofed setuptools.setup."
+        return 1
+    }
+    scripts=( "${(@f)$(<$tmpfile)}" )
+}
+
+# Extract python version and save to variable `python_version'.
+#
+# Only CPython is officially supported. If the --version output format differs
+# from that of CPython, `python_version' will be set to empty.
+_virtual_install_extract_python_version () {
+    local python tmpfile
+    python=$1
+    [[ -n $python ]] || {
+        print_error "Python path is empty."
+        return 1
+    }
+    tmpfile=$(mktemp)
+    trap 'rm -f $tmpfile' EXIT
+    $python --version &>|$tmpfile || {
+        print_error "Cannot execute $python --version."
+        return 1
+    }
+    python_version=${${:-"$(<$tmpfile)"}#Python }
+    [[ $python_version == <->.<->.<-> ]] || python_version=
+}
+
+# Invocation: _virtual_install_install <project_root> <project_name> \
+#                                      <source_python> <python_version>
+#
+# Here <source_python> is the full path to the Python executable (from which
+# virtualenv will be made), e.g., /usr/local/bin/python, or
+# $HOME/.pyenv/versions/3.5.1/bin/python.
+_virtual_install_install () {
+    local project_root project_name source_python python_version venv_name
+    project_root=$1
+    project_name=$2
+    source_python=$3
+    python_version=$4
+    venv_name=${project_name}${python_version:+-$python_version}
+    print_progress "Creating virtualenv '$venv_name'..."
+    mkvirtualenv $venv_name || {
+        print_error "mkvirtualenv returned with nonzero status $?."
+        return 1
+    }
+    # Get bin directory of the newly created virtualenv
+    local python_bin
+    python_bin=${commands[python]:h}
+    # Install project
+    print_progress "Installing project with setup.py develop..."
+    pushd $project_root &>/dev/null || {
+        print_error "Failed to cd into ${(qq)project_root}."
+        return 1
+    }
+    python setup.py develop || {
+        print_error "setup.py develop failed."
+        return 1
+    }
+    popd &>/dev/null
+    # Link scripts to $HOME/bin
+    local -a scripts
+    _virtual_install_extract_scripts $project_root || {
+        print_error "Failed to extract installed scripts."
+        return 1
+    }
+    print_progress "Symlinking scripts to ~/bin..."
+    mkdir -p $HOME/bin
+    local script script_path suffix
+    suffixes=( $(_virtual_install_generate_suffixes $python_version) '' )
+    for script in $scripts; do
+        script_path=$python_bin/$script
+        [[ -f $script_path ]] || {
+            print_error "${(qq)script_path} does not exist."
+            continue
+        }
+        for suffix in "$suffixes[@]"; do
+            ln -sf $script_path $HOME/bin/$script$suffix
+            print -R "Linked $script$suffix" >&2
+        done
+    done
+    deactivate
+    rehash
+}
+
+local project_root project_name source_python python_version pyenv_root
+while getopts ":hn:p:v:" opt; do
+    case $opt in
+        h)
+            cat <<EOF
+Install Python CLI tool in a fresh virtualenv, and link to ~/bin.
+
+Usage: $0 [options] PROJECT_ROOT
+
+PROJECT_ROOT is the root directory to the Python project, where setup.py is
+located.
+
+Options:
+    -h  show this help and return
+    -n NAME
+        name of the project/tool; deafult is the basename of project root
+    -p PYTHON_EXE
+        Python interpreter to use with the virtualenv
+    -v VERSION
+        Python version to use with the virtualenv (requires pyenv)
+
+By default, the current python is used as the Python interpreter if this
+function is invoked as virtual-install, and the current python3 is used if
+invoked as virtual-install3. If any -p or -v is specified on the command line,
+the last one should take effect.
+
+Note: Only CPython is officially supported. Version extraction, in particular,
+may be broken on other Pythons.
+
+EOF
+            return 1
+            ;;
+        n)
+            project_name=$OPTARG
+            ;;
+        p)
+            source_python=$OPTARG
+            _virtual_install_extract_python_version $source_python || {
+                print_error "Failed to extract version of $source_python."
+                return 1
+            }
+            ;;
+        v)
+            (( $+commands[pyenv] )) || {
+                print_error "pyenv not found, cannot use the -v option."
+                return 1
+            }
+            pyenv_root=$(command pyenv root) || {
+                print_error "Failed to extract pyenv root."
+                return 1
+            }
+            python_version=$OPTARG
+            source_python=$pyenv_root/versions/$python_version/bin/python
+            [[ -f $source_python ]] || {
+                print_error "${(qq)source_python} not found."
+                return 1
+            }
+            ;;
+        :) print_error "Option -$OPTARG requires an argument."; return 1;;
+        \?) print_error "Unrecognized option -$OPTARG."; return 1;;
+    esac
+done
+shift $((OPTIND-1))
+
+project_root=$1
+[[ -d $project_root ]] || {
+    print_error "Project root ${(qq)project_root} does not exist or is not directory."
+    return 1
+}
+
+# If project name isn't yet specified
+project_name=${project_name:-${project_root:t}}
+
+# If source Python isn't yet specified
+[[ -n $source_python ]] || {
+    if [[ $0 == virtual-install3 ]]; then
+        source_python=python3
+    else
+        source_python=python
+    fi
+    _virtual_install_extract_python_version $source_python || {
+        print_error "Failed to extract version of $source_python."
+        return 1
+    }
+}
+
+_virtual_install_install "$project_root" "$project_name" "$source_python" "$python_version"
+
+# Local Variables:
+# mode: sh
+# End:

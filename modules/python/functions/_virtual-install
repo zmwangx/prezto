@@ -1,0 +1,20 @@
+#compdef virtual-install
+#
+# Completion def for virtual-install.
+#
+# Authors:
+#   Zhiming Wang <zmwangx@gmail.com>
+#
+
+__virtual_install_pyenv_version () {
+    local pyenv_versions
+    pyenv_versions=( $(pyenv versions --bare 2>/dev/null) )
+    _describe 'pyenv python version' pyenv_versions
+}
+
+_arguments -s -S \
+           '(- : *)-h[show help and return]' \
+           '(-h)-n[name of project/tool]:name' \
+           '(-h -v)-p[Python interpreter]: :_command_names' \
+           '(-h -p)-v[Python version (pyenv)]: :__virtual_install_pyenv_version' \
+           ':project root:_files -/'
