@@ -80,6 +80,17 @@ function pmodload {
       fi
     fi
   done
+
+  # If the completion module has been enabled, then rerun compinit, since more
+  # completion definitions might have been loaded from the newly loaded
+  # module(s).
+  if zstyle -t ":prezto:module:completion" loaded; then
+    if (( ${+ZCOMPDUMP} )); then
+      autoload -Uz compinit && compinit -i -d "${ZCOMPDUMP}"
+    else
+      autoload -Uz compinit && compinit -i
+    fi
+  fi
 }
 
 #
