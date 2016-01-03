@@ -82,7 +82,7 @@ _virtual_install_extract_python_version () {
 # $HOME/.pyenv/versions/3.5.1/bin/python.
 _virtual_install_install () {
     local project_root project_name source_python python_version venv_name
-    project_root=$1
+    [[ $1 == /* ]] && project_root=$1 || project_root=$PWD/$1 # absolutify project root
     project_name=$2
     source_python=$3
     python_version=$4
@@ -97,7 +97,8 @@ _virtual_install_install () {
     python_bin=${commands[python]:h}
     # Install project
     print_progress "Installing project with setup.py develop..."
-    pushd $project_root &>/dev/null || {
+    local oldpwd=$PWD
+    cd $project_root || {
         print_error "Failed to cd into ${(qq)project_root}."
         return 1
     }
@@ -105,7 +106,10 @@ _virtual_install_install () {
         print_error "setup.py develop failed."
         return 1
     }
-    popd &>/dev/null
+    cd $oldpwd || {
+        print_error "Failed to restore old PWD ${(qq)oldpwd}."
+        return 1
+    }
     # Link scripts to $HOME/bin
     local -a scripts
     _virtual_install_extract_scripts $project_root || {
