@@ -78,7 +78,12 @@ for external_action in ${${(kM)functions:#acdcli-*}#acdcli-} ${${(kM)commands:#a
 done
 
 if (( CURRENT == 1 )); then
-    _describe -V -t commands 'action' actions # -V to retain order
+    if __acdcli_zsh_version_no_less_than 5.0.8; then
+        # The -V option for retaining order when added to _describe in 5.0.8
+        _describe -V -t commands 'action' actions
+    else
+        _describe -t commands 'action' actions
+    fi
     return
 fi
 

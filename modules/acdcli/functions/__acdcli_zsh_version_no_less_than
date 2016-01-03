@@ -1,0 +1,25 @@
+#autoload
+#
+# Zsh version check for enabling/disabling features only found in fairly recent
+# versions of Zsh.
+#
+# Accepts one positional argument: the minimum required version. Returns 0 or 1
+# for true or false. Version number should look like 5, 5.2, or 5.2.1.
+#
+# Authors:
+#   Zhiming Wang <zmwangx@gmail.com>
+#
+
+setopt localoptions noshwordsplit noksharrays nobashrematch typesetsilent
+local MATCH match
+local min_major min_minor min_patch
+local major minor patch
+[[ $1 =~ ([0-9]+)\.(([0-9]+)(\.([0-9]+))?)? ]]
+min_major=${match[1]:-0}
+min_minor=${match[3]:-0}
+min_patch=${match[5]:-0}
+[[ $ZSH_VERSION =~ ([0-9]+)\.(([0-9]+)(\.([0-9]+))?)? ]]
+major=${match[1]:-0}
+minor=${match[3]:-0}
+patch=${match[5]:-0}
+(( (major >= min_major) && (minor >= min_minor) && (patch >= min_patch) ))

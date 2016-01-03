@@ -18,4 +18,10 @@ command $timeout_cmd_args[@] acd_cli --check=none list-trash 2>/dev/null | \
         node_path=${line[(ws: :)3,-1]}
         nodes+="$node_id:$node_path"
     done
-_describe -V "trashed node" nodes # -V to unsort node IDs and present as returned by list-trash; see compadd
+if __acdcli_zsh_version_no_less_than 5.0.8; then
+    # -V to unsort node IDs and present as returned by list-trash
+    # Only available in 5.0.8 or later, though
+    _describe -V "trashed node" nodes
+else
+    _describe "trashed node" nodes
+fi
