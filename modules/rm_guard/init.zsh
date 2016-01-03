@@ -19,8 +19,8 @@ rm () {
         esac
     done
     for node; do
-        # -f, --force hasn't been specified && node is not a symlink && node is a git repo
-        [[ -z $force && ! -h $node && -e $node/.git ]] && {
+        # -f, --force hasn't been specified && node exists && node is not a symlink && node is a git repo
+        [[ -z $force && -e $node && ! -h $node && ( -e $node/.git || $node == (.git|*/.git) ) ]] && {
             printf "\e[31m'%s' is a git repo -- won't remove without the -f or --force option\e[0m\n" $node
             return 1
         }
