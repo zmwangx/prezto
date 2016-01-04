@@ -43,13 +43,13 @@ local interval=30
 
 [[ -n $1 ]] || { print_error "No command given."; return 1; }
 
+local command
+command=$1
+shift
 while :; do
     if (( eval )); then
         eval $@
     else
-        local command
-        command=$1
-        shift
         eval $command ${(q)@}
     fi
     sleep $interval
