@@ -23,21 +23,35 @@ command [arg...] is the command to be looped. If the -e, --eval option is
 specified, then all remaining arguments (including `command') are routed
 through `eval', so the command and arguments can be passed in whichever way
 `eval' understands (this is useful for shell syntax like a
-pipeline). Otherwise, command [arg...] is invoked directly.
+pipeline). Otherwise, command [arg...] is invoked directly, with arguments
+treated as plain positional arguments, although command is still subject to
+alias expansion.
+
+Technical note: under the hood, the direct invocation of command [arg...] is
+implemented as eval $command ${(q)arg} ... to enable alias expansion, so it's
+not safe against a crafted `command', or global aliases. In short, please don't
+do anything stupid.
 
 HELP
     return 1
 fi
 
-local eval=''
-[[ $1 == (-e|--eval) ]] && { eval='eval'; shift; }
+local eval
+[[ $1 == (-e|--eval) ]] && { eval=1; shift; }
 local interval=30
 [[ $1 == <-> ]] && { interval=$1; shift; }
 
 [[ -n $1 ]] || { print_error "No command given."; return 1; }
 
 while :; do
-    $eval $@  # If -e|--eval is not specified, then $eval is empty and ignored.
+    if (( eval )); then
+        eval $@
+    else
+        local command
+        command=$1
+        shift
+        eval $command ${(q)@}
+    fi
     sleep $interval
 done
 
