@@ -82,7 +82,7 @@ _virtual_install_extract_python_version () {
 # $HOME/.pyenv/versions/3.5.1/bin/python.
 _virtual_install_install () {
     local project_root project_name source_python python_version venv_name
-    [[ $1 == /* ]] && project_root=$1 || project_root=$PWD/$1 # absolutify project root
+    project_root=$1
     project_name=$2
     source_python=$3
     python_version=$4
@@ -142,10 +142,10 @@ while getopts ":hn:p:v:" opt; do
             cat <<EOF
 Install Python CLI tool in a fresh virtualenv, and link to ~/bin.
 
-Usage: $0 [options] PROJECT_ROOT
+Usage: $0 [options] [PROJECT_ROOT]
 
 PROJECT_ROOT is the root directory to the Python project, where setup.py is
-located.
+located. If omitted, use the current directory.
 
 Options:
     -h  show this help and return
@@ -199,14 +199,20 @@ EOF
 done
 shift $((OPTIND-1))
 
-project_root=$1
+[[ $1 == /* ]] && project_root=$1 || project_root=$PWD/$1 # absolutify project root
 [[ -d $project_root ]] || {
     print_error "Project root ${(qq)project_root} does not exist or is not directory."
     return 1
 }
+[[ -f $project_root/setup.py ]] || {
+    print_error "${(q-)project_root}/setup.py not found or is not a file."
+    return 1
+}
+project_root=${project_root%/.} # remove trailing /. to avoid a lame . for project name
 
 # If project name isn't yet specified
 project_name=${project_name:-${project_root:t}}
+echo $project_root
 
 # If source Python isn't yet specified
 [[ -n $source_python ]] || {
