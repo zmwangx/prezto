@@ -31,7 +31,9 @@ _Z_EXCLUDE_DIRS=(
 #
 # I don't care about others; for me, I know what `brew --prefix` would return
 # in each case, so no need to do a costly external call.
-for z in /usr/local/etc/profile.d/z.sh $HOME/.linuxbrew/etc/profile.d/z.sh /etc/profile.d/z.sh; do
-    [[ -f $z ]] && source $z && unset z && return 0
-done
-print -P '%F{red}Error: z.sh not found in standard locations.%f' && return 1
+function {
+    local z
+    for z in /usr/local/etc/profile.d/z.sh $HOME/.linuxbrew/etc/profile.d/z.sh /etc/profile.d/z.sh; do
+        [[ -f $z ]] && source $z && return
+    done
+}
