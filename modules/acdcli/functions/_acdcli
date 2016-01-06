@@ -102,6 +102,8 @@ case "$words[1]" in
     tree|t)
         args+=(
             '(-t --include-trash)'{-t,--include-trash}
+            '(-d --dir-only)'{-d,--dir-only}
+            '(-L --max-depth)'{-L,--max-depth}':max depth'
             '::root folder for the tree:__acdcli_dirs'
         )
         _arguments -S -s "$args[@]"
