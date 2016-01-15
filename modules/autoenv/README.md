@@ -29,6 +29,11 @@ directory. There are two special functions:
   `autoenv-insert-paths` are automatically taken care of, so you don't need
   `autoenv-purge` to deal with them.
 
+## Limitations
+
+Due to use of the `localoptions` option in `autoenv`'s sourcing wrapper,
+`setopt` or `unsetopt` statements in `.env` will not take effect.
+
 ## Examples
 
 * The most common use case might be to insert a local helper directory into the
