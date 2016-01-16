@@ -109,7 +109,7 @@ alias sl='ls'            # I often screw this up.
 
 # Grep
 if zstyle -t ':prezto:module:utility:grep' color; then
-  export GREP_COLOR='37;45'           # BSD.
+  export GREP_COLOR='34'           # BSD.
   export GREP_COLORS="mt=$GREP_COLOR" # GNU.
 
   alias grep="${aliases[grep]:-grep} --color=auto --exclude-dir=.git --exclude-dir=.tox"
