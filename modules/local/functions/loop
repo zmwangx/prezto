@@ -48,7 +48,7 @@ command=$1
 shift
 while :; do
     if (( eval )); then
-        eval $@
+        eval $command $@
     else
         eval $command ${(q)@}
     fi
