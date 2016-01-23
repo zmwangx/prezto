@@ -101,8 +101,8 @@ case "$words[1]" in
         ;;
     tree|t)
         args+=(
-            '(-t --include-trash)'{-t,--include-trash}
-            '(-d --dir-only)'{-d,--dir-only}
+            '(-t --include-trash)'{-t,--include-trash}'[include trashed nodes]'
+            '(-d --dir-only)'{-d,--dir-only}'[list directories only]'
             '(-L --max-depth)'{-L,--max-depth}':max depth'
             '::root folder for the tree:__acdcli_dirs'
         )
