@@ -1,0 +1,20 @@
+#autoload
+#
+# Completion def for acdcli-trees.
+#
+# acdcli-trees is a command from https://github.com/zmwangx/acdcli-more.
+#
+# Authors:
+#   Zhiming Wang <zmwangx@gmail.com>
+#
+
+_arguments -S -s \
+           '(- : *)-h[show help message and exit]' \
+           '(-t --include-trash)'{-t,--include-trash}'[include trashed nodes]' \
+           '(-d --dir-only)'{-d,--dir-only}'[list directories only]' \
+           '(-L --max-depth)'{-L,--max-depth}':max depth' \
+           '--no-human-readable[show sizes in plain byte counts]' \
+           '--numfmt[use numfmt(1) styled sizes]' \
+           '(--si --base10)'{--si,--base10}'[show sizes in SI (base 10) units instead of IEC (base 2)]' \
+           '(-P --progress)'{-P,--progress}'[show progress information while gathering information]' \
+           '::root folder for the tree:__acdcli_dirs'
