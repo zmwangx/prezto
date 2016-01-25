@@ -2,8 +2,8 @@
 #
 # My pure ASCII prompt theme.
 #
-# The theme is optimized for Solarized dark. I use it with Monaco 10pt (without
-# anti-aliasing).
+# The theme is optimized for Solarized dark. I use it with Monaco 10pt
+# (non-anti-aliased on non-Retina display, and anti-aliased on Retina display).
 #
 # The code is mostly ripped off the Pure theme by Sindre Sorhus
 # (https://github.com/sindresorhus/pure, MIT license). I originally forked from
