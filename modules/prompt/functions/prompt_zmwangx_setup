@@ -250,6 +250,24 @@ prompt_zmwangx_preprompt_render() {
     (( $+functions[git-info] )) && git-info
     local rootseg='%(!.%B%F{red}ROOT%f%b .)'
     local hostseg='%B%F{blue}${SSH_CONNECTION:+%M }%f%b'
+    if (( SHLVL > 1 )); then
+        [[ -n $prompt_zmwangx_shlvl_roman ]] || {
+            # Use Roman numerals of SHLVL - 1 for up to six levels of nesting
+            # (VII is too wide to good look as a normal character)
+            case $SHLVL in
+                2) prompt_zmwangx_shlvl_roman=$'\u2160';; # I
+                3) prompt_zmwangx_shlvl_roman=$'\u2161';; # II
+                4) prompt_zmwangx_shlvl_roman=$'\u2162';; # III
+                5) prompt_zmwangx_shlvl_roman=$'\u2163';; # IV
+                6) prompt_zmwangx_shlvl_roman=$'\u2164';; # V
+                7) prompt_zmwangx_shlvl_roman=$'\u2165';; # VI
+                *) (( prompt_zmwangx_shlvl_roman = SHLVL - 1 ));;
+            esac
+        }
+        local levelseg='%F{magenta}${prompt_zmwangx_shlvl_roman} %f'
+    else
+        local levelseg=''
+    fi
     local timeseg='%F{yellow}%*%f '
     local pathseg='%F{cyan}[%~]%f'
     local gitseg="${git_info:+${(e)git_info[prompt]}}%F{red}${prompt_zmwangx_git_dirty}%f "
@@ -262,7 +280,7 @@ prompt_zmwangx_preprompt_render() {
     fi
 
     # construct prompt, beginning with path
-    preprompt="$rootseg$hostseg$timeseg$pathseg$gitseg$pythonseg$jobseg$promptseg"
+    preprompt="$rootseg$hostseg$levelseg$timeseg$pathseg$gitseg$pythonseg$jobseg$promptseg"
 
     # debugging info
     if zstyle -t ':prezto:module:prompt:zmwangx' debug; then
