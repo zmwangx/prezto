@@ -14,7 +14,8 @@ Shortcuts for working with `transmission-daemon` and `transmission-remote`.
 * `tmsp spec...` for pausing torrents;
 * `tmsr spec...` for resuming torrents;
 * `tmsv spec...` for verifying torrents;
-* `tms-remove spec...` for removing transfers.
+* `tms-remove spec...` for removing transfers;
+* `tms-rm` abbreviated form of `tms-remove`.
 
 Here `spec` a torrent specification recognized by
 `transmission-remote`. Accepted torrent specs include, but may not be limited

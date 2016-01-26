@@ -54,7 +54,7 @@ __tms_central_command () {
             message_opening="Start verifying"
             action_opt=--verify
             ;;
-        tms-remove)
+        tms-remove|tms-rm)
             message_opening="Removing"
             action_opt=--remove
             ;;
@@ -72,7 +72,7 @@ __tms_central_command () {
 # Define individual functions realized by __tms_central_command
 function {
     local command
-    for command in tmsi tmsf tmsp tmsr tmsv tms-remove; do
+    for command in tmsi tmsf tmsp tmsr tmsv tms-remove tms-rm; do
         eval "$command () __tms_central_command $command \$@"
     done
 }
