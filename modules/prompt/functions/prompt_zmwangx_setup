@@ -296,9 +296,12 @@ prompt_zmwangx_preprompt_render() {
     prompt_zmwangx_prompt_string_length_to_var $preprompt "preprompt_length"
     local preprompt_lines=$(( (preprompt_length - 1) / COLUMNS + 1 ))
 
-    # if executing through precmd, do not perform fancy terminal editing
+    # if executing through precmd, do not perform fancy terminal editing except
+    # for clearing the current line, which is necessary for getting rid of
+    # unnecessary spaces introduced by promptsp, which creates a mess when
+    # COLUMNS changes
     if [[ $1 == 'precmd' ]]; then
-        print -P "$preprompt"
+        print -P "\e[K$preprompt"
     else
         # only redraw if preexec or prompt has changed
         [[ $1 == 'preexec' || $prompt_zmwangx_last_preprompt != $preprompt ]] || return
