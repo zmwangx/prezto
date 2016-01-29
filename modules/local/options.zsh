@@ -5,8 +5,8 @@ unsetopt auto_name_dirs
 unsetopt bang_hist
 unsetopt path_dirs
 
-export PROMPT_EOL_MARK="" # PROMPT_SP
-export LISTMAX=0 # ask if completion listing can't fit in one screen
+PROMPT_EOL_MARK="" # PROMPT_SP
+LISTMAX=0 # ask if completion listing can't fit in one screen
 
 # turn off ZLE bracketed paste in dumb term
 # otherwise turn on ZLE bracketed-paste-magic
