@@ -1,0 +1,11 @@
+#autoload
+#
+# Completion def for acdcli-md5sum
+#
+# Authors:
+#   Zhiming Wang <zmwangx@gmail.com>
+#
+
+_arguments -S -s \
+           '(-n --no-filenames)'{-n,--no-filenames}'[do not print filenames next to MD5 digests]' \
+           '*:: :__acdcli_nodes'
