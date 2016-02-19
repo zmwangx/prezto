@@ -80,7 +80,7 @@ alias gfc='git clone'
 alias gfm='git pull'
 alias gfM='git pull && git submodule update --init --recursive'
 alias gfr='git pull --rebase'
-alias gfp='git fetch --prune'
+alias gfp='git fetch --prune --all'
 
 # Grep (g)
 alias gg='git grep'
