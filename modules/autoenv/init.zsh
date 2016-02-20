@@ -50,8 +50,7 @@ _autoenv_source () {
         typeset -a new_paths
         # Convert arguments to absolute paths and store in the array new_paths
         for arg; do
-            [[ $arg == /* ]] || arg=$PWD/$arg
-            new_paths+=$arg
+            new_paths+=${arg:a}
         done
         path=( $new_paths $path )
         inserted_paths=( $new_paths $inserted_paths )
