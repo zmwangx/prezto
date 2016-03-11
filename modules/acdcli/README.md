@@ -3,6 +3,10 @@
 Define shell extension mechanism and completions for
 [`acd_cli`](https://github.com/yadayada/acd_cli/).
 
+## Aliases
+
+`acddown`, `acdls`, `acdsync`, `acdtrees`, `acdup`.
+
 ## Functions
 
 * `acdcli`, `acd_cli`, `acd_cli.py`: shell wrapper for `acdcli` with support
