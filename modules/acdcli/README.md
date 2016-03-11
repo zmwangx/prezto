@@ -10,12 +10,12 @@ Define shell extension mechanism and completions for
   function or command `acdcli-open` is available, then an action `open` is
   added to `acdcli`;
 
-* `acdcli-open`.
+* `acdcli-batch-rename`, `acdcli-open`: see [Actions](#actions).
 
 ## Actions
 
+* `batch-rename`: batch rename remote files;
 * `open`: open remote directories in the web interface.
-* `acdcli-batch-rename`: batch rename remote files.
 
 ## DIY
 
