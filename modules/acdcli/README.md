@@ -18,7 +18,10 @@ Define shell extension mechanism and completions for
 
 ## Actions
 
-* `batch-rename`: batch rename remote files;
+* `batch-rename`: batch rename remote files (optional dependencies:
+  `Text::CharWidth` from CPAN or `wcswidth` with Python3 from PyPI required for
+  formatting filenames with wide characters — without either dependency, such
+  filenames will mess up alignment);
 * `open`: open remote directories in the web interface.
 
 ## DIY

@@ -46,6 +46,25 @@ while getopts ":htv" opt; do
 done
 shift $((OPTIND-1))
 
+# Detect wcswidth provider
+perl_text_charwidth_available=0
+python_wcwidth_available=0
+if perl -e 'use Text::CharWidth' 2>/dev/null; then
+    perl_text_charwidth_available=1
+elif python3 -c 'import wcwidth' 2>/dev/null; then
+    python_wcwidth_available=1
+fi
+
+wcswidth () {
+    if (( perl_text_charwidth_available )); then
+        perl -e 'use Text::CharWidth qw(mbswidth); print mbswidth(@ARGV[0])' -- $1
+    elif (( python_wcwidth_available )); then
+        python3 -c 'import sys, wcwidth; print(wcwidth.wcswidth(sys.argv[1]))' $1
+    else
+        print $#1
+    fi
+}
+
 local perlstmts dir counter children child new_name ret=0
 perlstmts=$1 && shift
 for dir; do
@@ -57,6 +76,15 @@ for dir; do
         ret=1
         continue
     }
+
+    # Pad all filenames to a uniform length when printing, max 79
+    pad_to_len=0
+    for child in $children; do
+        len=$(wcswidth $child)
+        (( len > pad_to_len )) && pad_to_len=$len
+    done
+    (( pad_to_len > 79 )) && pad_to_len=79
+
     counter=0
     for child in $children; do
         (( counter++ ))
@@ -66,7 +94,9 @@ for dir; do
             continue
         }
         [[ $child != $new_name ]] || continue
-        printf "%s => %s\n" $child $new_name
+        len=$(wcswidth $child)
+        (( padding_len = pad_to_len > len ? pad_to_len - len : 0 ))
+        printf "%s%-${padding_len}s \e[32m=>\e[0m \e[34m%s\e[0m\n" $child '' $new_name
         (( test )) && continue
         command acd_cli $global_options rename $dir$child $new_name || {
             printf "Error: Failed to rename '%s%s' to '%s'" $dir $child $new_name
