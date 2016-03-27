@@ -1,0 +1,9 @@
+#autoload
+#
+# Completion def for acdcli-validate-md5sum.
+#
+# Authors:
+#   Zhiming Wang <zmwangx@gmail.com>
+#
+
+_arguments -S -s '*:: :__acdcli_nodes'

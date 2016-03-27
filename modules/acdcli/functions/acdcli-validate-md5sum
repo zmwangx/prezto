@@ -1,0 +1,26 @@
+#autoload
+#
+# Validate MD5 checksums of remote files against local database.
+#
+# Authors:
+#   Zhiming Wang <zmwangx@gmail.com>
+#
+
+setopt localoptions noshwordsplit noksharrays typesetsilent
+local global_options ret=0 md5
+global_options=( ${(s/:/)ACDCLI_GLOBAL_OPTS} )
+acdcli $global_options md5sum --recursive $@ | while read entry; do
+    md5=$entry[(ws: :)1]
+    # grep-md5 is a private script (it belongs to a private collection of
+    # scripts that I'm not open sourcing due to the sensitive nature of some of
+    # them) that queries a local database of md5 checksums.
+    grep-md5 $md5 2>/dev/null || {
+        print_error "Not found: $entry"
+        ret=1
+    }
+done
+return $ret
+
+# Local Variables:
+# mode: sh
+# End:
