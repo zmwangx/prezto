@@ -8,4 +8,5 @@
 
 _arguments -S -s \
            '(-n --no-filenames)'{-n,--no-filenames}'[do not print filenames next to MD5 digests]' \
+           '(-r --recursive)'{-r,--recursive}'[recurse into directories and subdirectories]' \
            '*:: :__acdcli_nodes'
