@@ -49,9 +49,9 @@ alias gco='git checkout'
 alias gcO='git checkout --patch'
 alias gcf='git commit --amend --gpg-sign --reuse-message=HEAD'
 alias gcF='git commit --amend --gpg-sign --verbose'
-alias gcp='git cherry-pick --ff'
-alias gcP='git cherry-pick --no-commit'
-alias gcr='git revert'
+alias gcp='git cherry-pick --ff --gpg-sign'
+alias gcP='git cherry-pick --no-commit --gpg-sign'
+alias gcr='git revert --gpg-sign'
 alias gcR='git reset "HEAD^"'
 alias gcs='git show'
 alias gcl='git-commit-lost'
@@ -110,9 +110,9 @@ alias glb='git log --topo-order --pretty=format:"${_git_log_brief_format}"'
 alias glc='git shortlog --summary --numbered'
 
 # Merge (m)
-alias gm='git merge'
-alias gmC='git merge --no-commit'
-alias gmF='git merge --no-ff'
+alias gm='git merge --gpg-sign'
+alias gmC='git merge --no-commit --gpg-sign'
+alias gmF='git merge --no-ff --gpg-sign'
 alias gma='git merge --abort'
 alias gmt='git mergetool'
 
@@ -125,10 +125,10 @@ alias gpc='git push --set-upstream origin "$(git-branch-current 2> /dev/null)"'
 alias gpp='git pull origin "$(git-branch-current 2> /dev/null)" && git push origin "$(git-branch-current 2> /dev/null)"'
 
 # Rebase (r)
-alias gr='git rebase'
+alias gr='git rebase --gpg-sign'
 alias gra='git rebase --abort'
 alias grc='git rebase --continue'
-alias gri='git rebase --interactive'
+alias gri='git rebase --interactive --gpg-sign'
 alias grs='git rebase --skip'
 
 # Remote (R)
