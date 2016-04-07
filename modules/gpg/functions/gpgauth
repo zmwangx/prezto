@@ -1,0 +1,17 @@
+#
+# Dummy passphrase authentication with gpg. Useful for populating gpg-agent
+# cache for use where passphrase prompt is impossible, e.g., within Emacs (with
+# Magit).
+#
+# Authors:
+#   Zhiming Wang <zmwangx@gmail.com>
+#
+
+setopt localoptions noshwordsplit
+local tmpfile=$(mktemp)
+gpg -s $tmpfile
+rm -f $tmpfile $tmpfile.gpg
+
+# Local Variables:
+# mode: sh
+# End:
