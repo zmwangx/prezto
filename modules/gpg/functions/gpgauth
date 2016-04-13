@@ -9,7 +9,7 @@
 
 setopt localoptions noshwordsplit
 local tmpfile=$(mktemp)
-gpg -s $tmpfile
+gpg2 -s $tmpfile
 rm -f $tmpfile $tmpfile.gpg
 
 # Local Variables:
