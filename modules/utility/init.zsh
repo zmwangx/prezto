@@ -38,16 +38,16 @@ if zstyle -t ':prezto:module:utility' correct; then
 fi
 
 # Disable globbing.
-alias bower='noglob bower'
-alias fc='noglob fc'
-alias find='noglob find'
-alias ftp='noglob ftp'
-alias history='noglob history'
-alias locate='noglob locate'
-alias rake='noglob rake'
-alias rsync='noglob rsync'
-alias scp='noglob scp'
-alias sftp='noglob sftp'
+# alias bower='noglob bower'
+# alias fc='noglob fc'
+# alias find='noglob find'
+# alias ftp='noglob ftp'
+# alias history='noglob history'
+# alias locate='noglob locate'
+# alias rake='noglob rake'
+# alias rsync='noglob rsync'
+# alias scp='noglob scp'
+# alias sftp='noglob sftp'
 
 # Define general aliases.
 alias _='sudo'
