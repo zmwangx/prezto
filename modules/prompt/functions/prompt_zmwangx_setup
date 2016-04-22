@@ -15,6 +15,8 @@
 #
 # #############################################################################
 #
+# ### Zstyles ###
+#
 # There are two zstyles you can set to customize the behavior of this theme,
 # all under ':prezto:module:prompt:zmwangx:git':
 #
@@ -33,6 +35,16 @@
 # ':prezto:module:prompt:zmwangx', which adds a ticker (updated every second)
 # and additional debugging info to the preprompt. Credit to @mafredri for the
 # idea of a ticker; this is pure genius!
+#
+# ### Environment variables ###
+#
+# Environment variables are used to temporarily alter behaviors.
+#
+# * PROMPT_ZMWANGX_NOSHLVL
+#
+#       If set and non-nil, suppress the (sub)shell level segment. Useful for,
+#       e.g., asciinema recordings, where one is expected to work in a
+#       subshell.
 #
 # #############################################################################
 #
@@ -253,7 +265,7 @@ prompt_zmwangx_preprompt_render() {
     (( $+functions[git-info] )) && git-info
     local rootseg='%(!.%B%F{red}ROOT%f%b .)'
     local hostseg='%B%F{blue}${SSH_CONNECTION:+%M }%f%b'
-    if (( SHLVL > 1 )); then
+    if [[ -z $PROMPT_ZMWANGX_NOSHLVL ]] && (( SHLVL > 1 )); then
         [[ -n $prompt_zmwangx_shlvl_roman ]] || {
             # Use Roman numerals of SHLVL - 1 for up to six levels of nesting
             # (VII is too wide to good look as a normal character)
