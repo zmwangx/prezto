@@ -18,13 +18,16 @@
 # There are two zstyles you can set to customize the behavior of this theme,
 # all under ':prezto:module:prompt:zmwangx:git':
 #
-# * autofetch:       Boolean (yes or no); whether to perform fetch from
-#                    upstream automatically when calculating relative position
-#                    with upstream. Default is 'yes'.
+# * autofetch
 #
-# * untracked_dirty: Boolean (yes or no); whether to check for untracked files.
-#                    Default is 'yes'. 'no' is only really useful in huge
-#                    repos.
+#       Boolean (yes or no); whether to perform fetch from upstream
+#       automatically when calculating relative position with upstream. Default
+#       is 'yes'.
+#
+# * untracked_dirty
+#
+#       Boolean (yes or no); whether to check for untracked files. Default is
+#       'yes'. 'no' is only really useful in huge repos.
 #
 # There is also a style specifically for debugging: 'debug' under
 # ':prezto:module:prompt:zmwangx', which adds a ticker (updated every second)
