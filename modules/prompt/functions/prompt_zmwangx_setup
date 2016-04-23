@@ -265,11 +265,15 @@ prompt_zmwangx_preprompt_render() {
     (( $+functions[git-info] )) && git-info
     local rootseg='%(!.%B%F{red}ROOT%f%b .)'
     local hostseg='%B%F{blue}${SSH_CONNECTION:+%M }%f%b'
-    if [[ -z $PROMPT_ZMWANGX_NOSHLVL ]] && (( SHLVL > 1 )); then
+
+    local effective_shlvl=$SHLVL
+    # Decrease effective level by one inside tmux
+    (( $+TMUX )) && (( effective_shlvl-- ))
+    if [[ -z $PROMPT_ZMWANGX_NOSHLVL ]] && (( effective_shlvl > 1 )); then
         [[ -n $prompt_zmwangx_shlvl_roman ]] || {
-            # Use Roman numerals of SHLVL - 1 for up to six levels of nesting
-            # (VII is too wide to good look as a normal character)
-            case $SHLVL in
+            # Use Roman numerals of effective_shlvl - 1 for up to six levels of
+            # nesting (VII is too wide to good look as a normal character)
+            case $effective_shlvl in
                 2) prompt_zmwangx_shlvl_roman=$'\u2160';; # I
                 3) prompt_zmwangx_shlvl_roman=$'\u2161';; # II
                 4) prompt_zmwangx_shlvl_roman=$'\u2162';; # III
@@ -283,6 +287,7 @@ prompt_zmwangx_preprompt_render() {
     else
         local levelseg=''
     fi
+
     local timeseg='%F{yellow}%*%f '
     local pathseg='%F{cyan}[%~]%f'
     local gitseg="${git_info:+${(e)git_info[prompt]}}%F{red}${prompt_zmwangx_git_dirty}%f "
