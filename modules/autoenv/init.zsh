@@ -131,5 +131,8 @@ _autoenv_purge () {
     done
 }
 
+# Try to source .env once on init (without chpwd)
+OLDPWD= _autoenv_source
+
 add-zsh-hook chpwd _autoenv_purge
 add-zsh-hook chpwd _autoenv_source
