@@ -16,6 +16,11 @@ Aliases
   - `brewu` updates Homebrew and formulae.
   - `brewx` uninstalls a formula.
 
+Contributor/developer-focused:
+
+  - `brewt` tests a formula.
+  - `brewa` audits a formula with the strictest settings.
+
 ### Homebrew Cask
 
   - `cask` is aliased to `brew cask`.

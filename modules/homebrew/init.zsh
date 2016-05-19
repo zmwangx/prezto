@@ -21,8 +21,11 @@ alias brewi='brew install'
 alias brewl='brew list'
 alias brews='brew search'
 alias brewu='brew update && brew upgrade --all'
-alias brewuv='brew update --verbose && brew upgrade --all --verbose'
 alias brewx='brew remove'
+
+# Contributor/developer-focused aliases
+alias brewt='brew test'
+alias brewa='brew audit --strict --online --display-cop-names --display-filename'
 
 # Homebrew Cask
 alias cask='brew cask'
