@@ -1,0 +1,14 @@
+#
+# Edit completion definition.
+#
+# Authors:
+#   Zhiming Wang <zmwangx@gmail.com>
+#
+
+setopt localoptions noshwordsplit noksharrays
+local moduledir=${ZDOTDIR:-$HOME}/.zprezto/modules/completion
+${VISUAL:-${EDITOR:-${${commands[emacs]:+emacs}:-vi}}} $moduledir/external/src/$1
+
+# Local Variables:
+# mode: sh
+# End:
