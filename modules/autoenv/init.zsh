@@ -43,8 +43,14 @@ _autoenv_source () {
 
     [[ -f $PWD/.env ]] || return
 
+    # Increase counter and save current directory to the directory stack
+    (( _autoenv_stack_counter++ ))
+    _autoenv_dirs[_autoenv_stack_counter]=$PWD
+
+    # Set purge function to the default value: the `:' builtin
+    _autoenv_purge_funcs[_autoenv_stack_counter]=:
+
     # Define autoenv-insert-paths which can be used inside .env
-    typeset -a inserted_paths
     autoenv-insert-paths () {
         local arg
         typeset -a new_paths
@@ -53,7 +59,9 @@ _autoenv_source () {
             new_paths+=${arg:a}
         done
         path=( $new_paths $path )
-        inserted_paths=( $new_paths $inserted_paths )
+        # Register inserted paths in the inserted path stack (as a single
+        # colon-delimited string)
+        _autoenv_inserted_paths[_autoenv_stack_counter]=${(j/:/)new_paths}
         rehash
         zstyle -t :prezto:module:autoenv quiet || {
             print -P '%F{green}Inserted paths:%f'
@@ -68,10 +76,6 @@ _autoenv_source () {
         return 1
     }
 
-    # Increase counter and save current directory to the directory stack
-    (( _autoenv_stack_counter++ ))
-    _autoenv_dirs[_autoenv_stack_counter]=$PWD
-
     # Register the purge function autoenv-purge in the purge function stack if
     # there is one; otherwise, register the `:' builtin
     if (( $+functions[autoenv-purge] )); then
@@ -81,13 +85,7 @@ _autoenv_source () {
         # under a different name.
         eval "${${:-"$(whence -f autoenv-purge)"}/autoenv-purge/$funcname}"
         _autoenv_purge_funcs[_autoenv_stack_counter]=$funcname
-    else
-        _autoenv_purge_funcs[_autoenv_stack_counter]=:
     fi
-
-    # Register inserted paths in the inserted path stack (as a single
-    # colon-delimited string)
-    _autoenv_inserted_paths[_autoenv_stack_counter]=${(j/:/)inserted_paths}
 }
 
 _autoenv_purge () {
