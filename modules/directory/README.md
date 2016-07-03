@@ -15,8 +15,6 @@ Options
   - `AUTO_NAME_DIRS` auto adds variable-stored paths to `~` list.
   - `MULTIOS` writes to multiple descriptors.
   - `EXTENDED_GLOB` uses extended globbing syntax.
-  - `CLOBBER` does not overwrite existing files with `>` and `>>`. Use `>!` and
-    `>>!` to bypass.
 
 Aliases
 -------
