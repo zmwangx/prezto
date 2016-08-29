@@ -1,6 +1,7 @@
 # transmission
 
-Shortcuts for working with `transmission-daemon` and `transmission-remote`.
+Shortcuts for working with `transmission-daemon`, `transmission-remote` and
+`transmission-show`.
 
 ## Aliases and functions
 
@@ -9,13 +10,15 @@ Shortcuts for working with `transmission-daemon` and `transmission-remote`.
 * `tms` is alias for `transmission-remote`;
 * `tmsa [torrent|magnet]...` for adding torrents;
 * `tmsi spec...` for retrieving torrent info;
-* `tmsf spec...` for listing torrent files;
+* `tmsf spec...` for listing files in torrents;
 * `tmse spec fileno_list` for excluding files from torrent;
 * `tmsp spec...` for pausing torrents;
 * `tmsr spec...` for resuming torrents;
 * `tmsv spec...` for verifying torrents;
 * `tms-remove spec...` for removing transfers;
-* `tms-rm` abbreviated form of `tms-remove`.
+* `tms-rm` abbreviated form of `tms-remove`;
+* `tms-files torrent` for listing files in a torrent without queueing it for
+  download.
 
 Here `spec` a torrent specification recognized by
 `transmission-remote`. Accepted torrent specs include, but may not be limited

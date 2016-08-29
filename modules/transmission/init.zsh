@@ -91,3 +91,16 @@ HELP
     command transmission-remote --torrent $1 --no-get $2 \
         || { print_error "Failed to exclude files '$2' from torrent $1."; return 1; }
 }
+
+# transmission-show wrapper that lists files in a torrent without bullshit
+tms-files () {
+    if [[ $1 == (-h|--help) ]]; then
+        cat >&2 <<HELP
+Usage: tms-files <torrent>
+
+<torrent> is a torrent file to be listed.
+HELP
+        return 1
+    fi
+    command transmission-show $1 | sed -n '/^FILES$/,$ { /^FILES$/d; /^$/d; s/^  //; p }'
+}
