@@ -80,6 +80,18 @@ if is-callable 'dircolors'; then
   else
     alias ls="${aliases[ls]:-ls} -F -v"
   fi
+
+  # coreutils 8.26:
+  #
+  #   ls now aligns quoted items with non quoted items, which is easier to read,
+  #   and also better indicates that the quote is not part of the actual name.
+  #
+  # But this nice behavior isn't available when -1 is specified. This is a
+  # workaround that restores the alignment behavior. -w is not portable,
+  # though.
+  #
+  # See https://debbugs.gnu.org/cgi/bugreport.cgi?bug=25078.
+  alias l='ls -w1 -A'
 else
   # BSD Core Utilities
   if zstyle -t ':prezto:module:utility:ls' color; then
@@ -93,9 +105,10 @@ else
   else
     alias ls="${aliases[ls]:-ls} -F"
   fi
+
+  alias l='ls -1A'
 fi
 
-alias l='ls -1A'         # Lists in one column, hidden files.
 alias ll='ls -lh'        # Lists human readable sizes.
 alias lr='ll -R'         # Lists human readable sizes, recursively.
 alias la='ll -A'         # Lists human readable sizes, hidden files.
