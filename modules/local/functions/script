@@ -1,0 +1,13 @@
+#
+# script(1) wrapper with saner output file.
+#
+# Authors:
+#   Zhiming Wang <zmwangx@gmail.com>
+#
+
+local output="$(mktemp /tmp/typescript-XXXXXXX)"
+command script $output
+
+# Local Variables:
+# mode: sh
+# End:
