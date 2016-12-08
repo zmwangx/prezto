@@ -1,0 +1,18 @@
+#
+# brew, quiet version.
+#
+# That is, run brew with HOMEBREW_VERBOSE unset, regardless of its current
+# state (which is restored upon completion).
+#
+# Authors:
+#   Zhiming Wang <zmwangx@gmail.com>
+#
+
+local declaration="$(typeset -p HOMEBREW_VERBOSE 2>/dev/null || :)"
+unset HOMEBREW_VERBOSE
+brew "$@"
+eval "$declaration"
+
+# Local Variables:
+# mode: sh
+# End:

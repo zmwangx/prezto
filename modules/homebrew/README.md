@@ -3,6 +3,11 @@ Homebrew
 
 Defines Homebrew aliases.
 
+Functions
+---------
+
+  - `brewq` runs `brew` with `HOMEBREW_VERBOSE` unset.
+
 Aliases
 -------
 

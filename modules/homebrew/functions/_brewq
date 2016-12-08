@@ -1,0 +1,4 @@
+#compdef brewq
+#autoload
+
+_brew "$@"
