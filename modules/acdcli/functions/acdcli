@@ -12,7 +12,7 @@ internal_commands=(
     version v sync s old-sync clear-cache cc tree t children ls dir find f
     find-md5 fh find-regex fr upload ul overwrite ov stream st download dl
     cat create c mkdir list-trash lt trash rm restore re move mv rename rn
-    resolve rs add-child ac remove-child rc usage u quota q metadata m
+    resolve rs add-child ac remove-child rc usage u psync quota q metadata m
     mount umount delete-everything init i dumpsql test
 )
 original_args=($@)
