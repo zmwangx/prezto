@@ -7,15 +7,6 @@
 [submodule "modules/completion/external"]
 	path = modules/completion/external
 	url = git@github.com:zmwangx/zsh-completions.git
-[submodule "modules/prompt/external/powerline"]
-	path = modules/prompt/external/powerline
-	url = https://github.com/davidjrice/prezto_powerline.git
-[submodule "modules/prompt/external/agnoster"]
-	path = modules/prompt/external/agnoster
-	url = https://gist.github.com/3712874.git
-[submodule "modules/prompt/functions/pure"]
-	path = modules/prompt/external/pure
-	url = https://github.com/sindresorhus/pure.git
 [submodule "modules/async/external"]
 	path = modules/async/external
 	url = git@github.com:mafredri/zsh-async.git
